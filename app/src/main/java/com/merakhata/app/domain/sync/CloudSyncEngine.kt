@@ -16,7 +16,7 @@ import java.net.URL
 
 object CloudSyncEngine {
 
-    private const val CLOUD_TUNNEL_URL = "https://small-pets-teach.loca.lt"
+    private const val CLOUD_TUNNEL_URL = "https://fancy-worms-relate.loca.lt"
 
     /**
      * Pushes local database state (customers, transactions, reminders) to Cloud Database.

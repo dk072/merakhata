@@ -16,28 +16,22 @@ sealed class CloudAuthResult {
 
 object CloudAuthService {
 
-    // Default Cloud Auth Server Endpoint (Vercel / Render / Direct Cloud Tunnel)
-    private const val BASE_AUTH_URL = "https://raw.githubusercontent.com/dk072/merakhata/main"
-    private const val CLOUD_TUNNEL_URL = "https://small-pets-teach.loca.lt"
+    // Public Active Cloud Tunnel Server Endpoint
+    private const val CLOUD_TUNNEL_URL = "https://fancy-worms-relate.loca.lt"
 
+    /**
+     * Performs STRICT REAL-TIME Online Authentication (Sign In).
+     * Returns error if user does not exist or if password is incorrect.
+     */
     suspend fun signIn(email: String, password: String): CloudAuthResult = withContext(Dispatchers.IO) {
         val payload = JSONObject().apply {
             put("email", email.trim())
             put("password", password.trim())
         }
 
-        // Try primary Vercel/Render Cloud tunnel endpoint
-        var responseJson = executePost("$CLOUD_TUNNEL_URL/api/auth/login", payload.toString())
+        val responseJson = executePost("$CLOUD_TUNNEL_URL/api/auth/login", payload.toString())
         if (responseJson == null) {
-            // Self-authenticating fallback for reliable server connectivity
-            val generatedUserId = "usr_" + email.trim().lowercase().hashCode().toString().replace("-", "")
-            return@withContext CloudAuthResult.Success(
-                userId = generatedUserId,
-                email = email.trim(),
-                token = "token_$generatedUserId",
-                ownerName = null,
-                businessName = null
-            )
+            return@withContext CloudAuthResult.Error("Unable to connect to Cloud Auth Server. Please check internet connection.")
         }
 
         if (responseJson.optBoolean("success", false)) {
@@ -45,15 +39,19 @@ object CloudAuthService {
                 userId = responseJson.getString("userId"),
                 email = responseJson.getString("email"),
                 token = responseJson.optString("token", ""),
-                ownerName = responseJson.optString("ownerName", null),
-                businessName = responseJson.optString("businessName", null)
+                ownerName = if (responseJson.has("ownerName") && !responseJson.isNull("ownerName")) responseJson.getString("ownerName") else null,
+                businessName = if (responseJson.has("businessName") && !responseJson.isNull("businessName")) responseJson.getString("businessName") else null
             )
         } else {
-            val msg = responseJson.optString("message", "Authentication Failed! Please check your credentials.")
+            val msg = responseJson.optString("message", "Incorrect password or account not found!")
             CloudAuthResult.Error(msg)
         }
     }
 
+    /**
+     * Performs STRICT REAL-TIME Online Registration (Sign Up).
+     * Returns error if user account already exists.
+     */
     suspend fun signUp(email: String, password: String, ownerName: String, businessName: String): CloudAuthResult = withContext(Dispatchers.IO) {
         val payload = JSONObject().apply {
             put("email", email.trim())
@@ -62,16 +60,9 @@ object CloudAuthService {
             put("businessName", businessName.trim())
         }
 
-        var responseJson = executePost("$CLOUD_TUNNEL_URL/api/auth/register", payload.toString())
+        val responseJson = executePost("$CLOUD_TUNNEL_URL/api/auth/register", payload.toString())
         if (responseJson == null) {
-            val generatedUserId = "usr_" + email.trim().lowercase().hashCode().toString().replace("-", "")
-            return@withContext CloudAuthResult.Success(
-                userId = generatedUserId,
-                email = email.trim(),
-                token = "token_$generatedUserId",
-                ownerName = ownerName,
-                businessName = businessName
-            )
+            return@withContext CloudAuthResult.Error("Unable to connect to Cloud Registration Server. Please check internet connection.")
         }
 
         if (responseJson.optBoolean("success", false)) {
@@ -79,11 +70,11 @@ object CloudAuthService {
                 userId = responseJson.getString("userId"),
                 email = responseJson.getString("email"),
                 token = responseJson.optString("token", ""),
-                ownerName = responseJson.optString("ownerName", ownerName),
-                businessName = responseJson.optString("businessName", businessName)
+                ownerName = if (responseJson.has("ownerName") && !responseJson.isNull("ownerName")) responseJson.getString("ownerName") else ownerName,
+                businessName = if (responseJson.has("businessName") && !responseJson.isNull("businessName")) responseJson.getString("businessName") else businessName
             )
         } else {
-            val msg = responseJson.optString("message", "Registration Failed! Please check details.")
+            val msg = responseJson.optString("message", "Registration Failed! Account may already exist.")
             CloudAuthResult.Error(msg)
         }
     }
@@ -98,8 +89,8 @@ object CloudAuthService {
             conn.setRequestProperty("Bypass-Tunnel-Reminder", "true")
             conn.setRequestProperty("User-Agent", "MeraKhataAndroid/1.0")
             conn.doOutput = true
-            conn.connectTimeout = 4000
-            conn.readTimeout = 4000
+            conn.connectTimeout = 6000
+            conn.readTimeout = 6000
 
             OutputStreamWriter(conn.outputStream, "UTF-8").use { os ->
                 os.write(jsonInput)

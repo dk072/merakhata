@@ -1,7 +1,7 @@
 {
-    "versionCode":  18,
-    "versionName":  "1.0.17",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.17.apk",
-    "releaseNotes":  "?? Vercel/Render Cloud Auth \u0026 Sync Integration! Zero Firebase API keys required. Real-time online login and cloud ledger sync.",
+    "versionCode":  19,
+    "versionName":  "1.0.18",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.18.apk",
+    "releaseNotes":  "?? STRICT Real-Time Cloud Online Authentication Fix! Password and registration verified in real-time against active Cloud Auth Server. No mock login bypass.",
     "isMandatory":  false
 }
