@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.merakhata.app.AccountingEngineTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-07-28T12:02:06" hostname="DINESH" time="0.095">
+  <properties/>
+  <testcase name="testParseToMinorUnits" classname="com.merakhata.app.AccountingEngineTest" time="0.036"/>
+  <testcase name="testFormatCurrency" classname="com.merakhata.app.AccountingEngineTest" time="0.028"/>
+  <testcase name="testCustomerLedgerCalculations" classname="com.merakhata.app.AccountingEngineTest" time="0.026"/>
+  <testcase name="testDashboardSummaryCalculations" classname="com.merakhata.app.AccountingEngineTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

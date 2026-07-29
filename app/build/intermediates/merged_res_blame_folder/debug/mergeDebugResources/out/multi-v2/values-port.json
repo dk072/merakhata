@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.merakhata.app-mergeDebugResources-60:/values-port/values-port.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\dines\\.gradle\\caches\\transforms-4\\fe35f134cd2ed124e9445e30de3cd376\\transformed\\appcompat-1.2.0\\res\\values-port\\values-port.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "55",
+                        "endOffsets": "106"
+                    }
+                }
+            ]
+        }
+    ]
+}

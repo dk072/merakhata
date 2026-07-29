@@ -1,0 +1,9 @@
+{
+  "name": "merakhata-update-server",
+  "version": "1.0.1",
+  "description": "Static OTA Update server for Mera Khata Android App",
+  "main": "update.json",
+  "scripts": {
+    "start": "npx serve ."
+  }
+}
