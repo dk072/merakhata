@@ -3,8 +3,9 @@ package com.merakhata.app.domain.sync
 import com.merakhata.app.data.repository.KhataRepository
 import com.merakhata.app.domain.backup.BackupManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -33,17 +34,12 @@ object CloudSyncManager {
             val transactions = repository.getAllTransactionsList()
             val reminders = repository.getActiveRemindersList()
 
-            // Generate structured sync bundle
-            val syncJson = BackupManager.createBackupJson(customers, transactions, reminders)
+            // Retrieve active logged-in userId
+            val userId = repository.preferences.userId.firstOrNull() ?: "device_guest_user"
 
-            // Validate local integrity
-            val validation = BackupManager.validateBackupJson(syncJson)
-            if (!validation.isValid) {
-                _syncState.value = SyncState.Error("Sync validation failed: ${validation.errorMessage}")
-                return@withContext false
-            }
+            // Push to Firebase Realtime Cloud Database
+            FirebaseRealtimeSyncEngine.pushLocalDataToCloud(repository, userId)
 
-            // Simulate cloud server handshake & persistence
             val now = System.currentTimeMillis()
             val formatter = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())
             val formattedTime = formatter.format(Date(now))
