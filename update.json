@@ -1,7 +1,7 @@
 {
-    "versionCode":  22,
-    "versionName":  "1.0.21",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.21.apk",
-    "releaseNotes":  "?? GLOBAL MULTI-DEVICE CLOUD AUTHENTICATION \u0026 SYNC! Accounts and ledgers seamlessly sync across Phone, Laptop, and Emulators.",
+    "versionCode":  23,
+    "versionName":  "1.0.22",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.22.apk",
+    "releaseNotes":  "?? Major Security Update: Server-side Authentication \u0026 Data Isolation Implemented",
     "isMandatory":  false
 }

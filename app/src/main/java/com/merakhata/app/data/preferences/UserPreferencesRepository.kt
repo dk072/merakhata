@@ -24,6 +24,7 @@ class UserPreferencesRepository(private val context: Context) {
         private val KEY_AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
         private val KEY_USER_ID = stringPreferencesKey("user_id")
         private val KEY_USER_EMAIL = stringPreferencesKey("user_email")
+        private val KEY_AUTH_TOKEN = stringPreferencesKey("auth_token")
         private val KEY_IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
     }
 
@@ -80,6 +81,10 @@ class UserPreferencesRepository(private val context: Context) {
         preferences[KEY_USER_EMAIL]
     }
 
+    val authToken: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[KEY_AUTH_TOKEN]
+    }
+
     val isLoggedIn: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[KEY_IS_LOGGED_IN] ?: false
     }
@@ -99,10 +104,11 @@ class UserPreferencesRepository(private val context: Context) {
         }
     }
 
-    suspend fun setCloudUserLogin(id: String, email: String) {
+    suspend fun setCloudUserLogin(id: String, email: String, token: String = "") {
         context.dataStore.edit { preferences ->
             preferences[KEY_USER_ID] = id
             preferences[KEY_USER_EMAIL] = email
+            preferences[KEY_AUTH_TOKEN] = token
             preferences[KEY_IS_LOGGED_IN] = true
         }
     }
@@ -112,6 +118,7 @@ class UserPreferencesRepository(private val context: Context) {
             preferences[KEY_IS_LOGGED_IN] = false
             preferences.remove(KEY_USER_ID)
             preferences.remove(KEY_USER_EMAIL)
+            preferences.remove(KEY_AUTH_TOKEN)
         }
     }
 

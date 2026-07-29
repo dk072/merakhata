@@ -48,9 +48,7 @@ object FirebaseAuthService {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            // Fallback for offline mode or network error
-            val fallbackUserId = "usr_" + email.lowercase().hashCode().toString().replace("-", "")
-            AuthResult.Success(idToken = "token_$fallbackUserId", userId = fallbackUserId, email = email)
+            AuthResult.Error("Unable to connect to authentication server. Please try again.")
         }
     }
 
@@ -81,8 +79,7 @@ object FirebaseAuthService {
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            val fallbackUserId = "usr_" + email.lowercase().hashCode().toString().replace("-", "")
-            AuthResult.Success(idToken = "token_$fallbackUserId", userId = fallbackUserId, email = email)
+            AuthResult.Error("Unable to connect to authentication server. Please try again.")
         }
     }
 

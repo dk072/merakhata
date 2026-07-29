@@ -303,16 +303,18 @@ fun AuthScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                OutlinedButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onNavigateBack()
-                    },
-                    border = BorderStroke(1.5.dp, CardBorderLight),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth().height(48.dp)
-                ) {
-                    Text("Continue 100% Offline", color = MediumSlate, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                if (isLoggedIn) {
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onNavigateBack()
+                        },
+                        border = BorderStroke(1.5.dp, CardBorderLight),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                    ) {
+                        Text("Back to Application", color = MediumSlate, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    }
                 }
             }
         }

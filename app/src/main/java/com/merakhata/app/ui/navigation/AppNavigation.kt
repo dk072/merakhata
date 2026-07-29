@@ -46,6 +46,7 @@ fun AppNavigation(navController: NavHostController = rememberNavController()) {
 
     val isOnboardingCompleted by repository.preferences.isOnboardingCompleted.collectAsState(initial = true)
     val isAppLockEnabled by repository.preferences.isAppLockEnabled.collectAsState(initial = false)
+    val isLoggedIn by repository.preferences.isLoggedIn.collectAsState(initial = false)
 
     val securityViewModel = remember { SecurityViewModel(repository) }
     val isUnlocked by securityViewModel.isUnlocked.collectAsState()
@@ -60,13 +61,27 @@ fun AppNavigation(navController: NavHostController = rememberNavController()) {
         BottomNavItem.Settings
     )
 
-    val showBottomBar = currentRoute in bottomNavItems.map { it.route }
+    val showBottomBar = isLoggedIn && currentRoute in bottomNavItems.map { it.route }
 
-    // Lock check on app launch
+    // Enforce Authentication Check on Launch
     val startDestination = when {
         isAppLockEnabled && !isUnlocked -> NavRoutes.PinLock.route
         !isOnboardingCompleted -> NavRoutes.Onboarding.route
+        !isLoggedIn -> NavRoutes.Auth.route
         else -> NavRoutes.Home.route
+    }
+
+    // Redirect to AuthScreen if trying to access protected screens while logged out
+    LaunchedEffect(isLoggedIn, currentRoute) {
+        if (!isLoggedIn && currentRoute != null &&
+            currentRoute != NavRoutes.Auth.route &&
+            currentRoute != NavRoutes.Onboarding.route &&
+            currentRoute != NavRoutes.PinLock.route
+        ) {
+            navController.navigate(NavRoutes.Auth.route) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
     }
 
     Scaffold(
@@ -174,8 +189,16 @@ fun AppNavigation(navController: NavHostController = rememberNavController()) {
                 val vm = remember { AuthViewModel(repository) }
                 AuthScreen(
                     viewModel = vm,
-                    onNavigateBack = { navController.popBackStack() },
-                    onAuthSuccess = { navController.popBackStack() }
+                    onNavigateBack = {
+                        if (isLoggedIn) {
+                            navController.popBackStack()
+                        }
+                    },
+                    onAuthSuccess = {
+                        navController.navigate(NavRoutes.Home.route) {
+                            popUpTo(NavRoutes.Auth.route) { inclusive = true }
+                        }
+                    }
                 )
             }
 

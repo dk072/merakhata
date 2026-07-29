@@ -2,8 +2,10 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
+const os = require('os');
+
 // In-Memory & File-backed Database Store
-const DATA_FILE = path.join('/tmp', 'merakhata_db.json');
+const DATA_FILE = path.join(os.tmpdir(), 'merakhata_db.json');
 
 function loadDb() {
     try {
@@ -19,6 +21,10 @@ function loadDb() {
 
 function saveDb(db) {
     try {
+        const dir = path.dirname(DATA_FILE);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
     } catch (e) {
         console.error("Error writing DB file:", e);

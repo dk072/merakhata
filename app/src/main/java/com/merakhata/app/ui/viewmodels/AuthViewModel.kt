@@ -37,30 +37,31 @@ class AuthViewModel(private val repository: KhataRepository) : ViewModel() {
         val trimmedEmail = emailInput.trim()
         val trimmedPassword = passwordInput.trim()
 
-        if (trimmedEmail.isEmpty() || !trimmedEmail.contains("@")) {
+        if (trimmedEmail.isEmpty() || !trimmedEmail.contains("@") || !trimmedEmail.contains(".")) {
             authState.value = AuthState.Error("Please enter a valid email address.")
             return
         }
 
-        if (trimmedPassword.length < 4) {
-            authState.value = AuthState.Error("Password must be at least 4 characters.")
+        if (trimmedPassword.isEmpty()) {
+            authState.value = AuthState.Error("Please enter your password.")
             return
         }
 
         viewModelScope.launch {
             authState.value = AuthState.Loading
 
-            // Real-Time Online Authentication with Vercel/Render Cloud Auth Backend (No Firebase API Key required)
             when (val result = CloudAuthService.signIn(trimmedEmail, trimmedPassword)) {
                 is CloudAuthResult.Success -> {
-                    repository.preferences.setCloudUserLogin(result.userId, result.email)
+                    // Wipe any local data leftover from previous user session for data isolation
+                    repository.clearAllLocalData()
+
+                    repository.preferences.setCloudUserLogin(result.userId, result.email, result.token)
                     if (!result.ownerName.isNullOrEmpty()) {
                         repository.preferences.updateProfile(result.ownerName, result.businessName ?: "")
                     }
 
                     // Fetch existing cloud data for this user account & restore to local database
                     CloudSyncEngine.fetchCloudDataAndRestore(repository, result.userId)
-                    // Push latest state to cloud
                     CloudSyncEngine.pushLocalDataToCloud(repository, result.userId)
                     CloudSyncManager.syncAll(repository)
 
@@ -78,7 +79,7 @@ class AuthViewModel(private val repository: KhataRepository) : ViewModel() {
         val trimmedEmail = emailInput.trim()
         val trimmedPassword = passwordInput.trim()
 
-        if (trimmedEmail.isEmpty() || !trimmedEmail.contains("@")) {
+        if (trimmedEmail.isEmpty() || !trimmedEmail.contains("@") || !trimmedEmail.contains(".")) {
             authState.value = AuthState.Error("Please enter a valid email address.")
             return
         }
@@ -91,10 +92,12 @@ class AuthViewModel(private val repository: KhataRepository) : ViewModel() {
         viewModelScope.launch {
             authState.value = AuthState.Loading
 
-            // Real-Time Online Account Registration with Vercel/Render Cloud Auth Backend
             when (val result = CloudAuthService.signUp(trimmedEmail, trimmedPassword, ownerName, businessName)) {
                 is CloudAuthResult.Success -> {
-                    repository.preferences.setCloudUserLogin(result.userId, result.email)
+                    // Wipe local data for clean isolate workspace
+                    repository.clearAllLocalData()
+
+                    repository.preferences.setCloudUserLogin(result.userId, result.email, result.token)
                     if (ownerName.isNotBlank()) {
                         repository.preferences.updateProfile(ownerName.trim(), businessName.trim())
                     }
@@ -114,6 +117,9 @@ class AuthViewModel(private val repository: KhataRepository) : ViewModel() {
 
     fun logout(onLoggedOut: () -> Unit) {
         viewModelScope.launch {
+            // Clear local Room database tables to preserve data isolation
+            repository.clearAllLocalData()
+            // Clear preferences & session token
             repository.preferences.logoutCloudUser()
             authState.value = AuthState.Idle
             onLoggedOut()

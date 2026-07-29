@@ -48,4 +48,10 @@ class KhataRepository(
     suspend fun getAllCustomersList(): List<CustomerEntity> = customerDao.getAllCustomersList()
     suspend fun getAllTransactionsList(): List<TransactionEntity> = transactionDao.getAllTransactionsList()
     suspend fun getActiveRemindersList(): List<ReminderEntity> = reminderDao.getActiveRemindersList()
+
+    suspend fun clearAllLocalData() {
+        customerDao.deleteAllCustomers()
+        transactionDao.deleteAllTransactions()
+        reminderDao.deleteAllReminders()
+    }
 }
