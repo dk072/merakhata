@@ -60,7 +60,7 @@ fun HomeScreen(
                 },
                 icon = { Icon(Icons.Default.Add, contentDescription = null, tint = Color.White) },
                 text = { Text("+ ADD CUSTOMER", fontWeight = FontWeight.Bold, color = Color.White, letterSpacing = 0.5.sp) },
-                containerColor = DeepEmerald,
+                containerColor = EmeraldPrimary,
                 contentColor = Color.White,
                 shape = RoundedCornerShape(24.dp),
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
@@ -71,9 +71,9 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(MaterialTheme.colorScheme.background)
+                .background(BackgroundLight)
         ) {
-            // Header Bar with Rich Multi-Color Mesh Gradient
+            // Header Bar with Crisp Khatabook Emerald Gradient
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -99,16 +99,16 @@ fun HomeScreen(
                                 Text(
                                     text = "Owner: $ownerName",
                                     fontSize = 13.sp,
-                                    color = Color.White.copy(alpha = 0.85f)
+                                    color = Color.White.copy(alpha = 0.9f)
                                 )
                             }
                         }
                         Surface(
-                            color = Color.White.copy(alpha = 0.2f),
+                            color = Color.White.copy(alpha = 0.25f),
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                text = "v1.0.5",
+                                text = "v1.0.9",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
@@ -119,13 +119,13 @@ fun HomeScreen(
 
                     Spacer(modifier = Modifier.height(18.dp))
 
-                    // Dashboard Premium Summary Card
+                    // Dashboard Premium Summary Card - Pure White High Contrast Card
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                         shape = RoundedCornerShape(20.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                        border = BorderStroke(1.dp, CardBorderLight)
                     ) {
                         Column(
                             modifier = Modifier
@@ -139,14 +139,14 @@ fun HomeScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "You Will Receive",
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        fontSize = 13.sp,
+                                        color = MediumSlate,
                                         fontWeight = FontWeight.SemiBold
                                     )
-                                    Spacer(modifier = Modifier.height(3.dp))
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = AccountingEngine.formatCurrency(dashboardSummary.totalReceivableMinor),
-                                        fontSize = 20.sp,
+                                        fontSize = 22.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = ReceivableGreen
                                     )
@@ -154,22 +154,22 @@ fun HomeScreen(
 
                                 VerticalDivider(
                                     modifier = Modifier
-                                        .height(44.dp)
-                                        .padding(horizontal = 12.dp),
-                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                                        .height(48.dp)
+                                        .padding(horizontal = 14.dp),
+                                    color = CardBorderLight
                                 )
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "You Will Pay",
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        fontSize = 13.sp,
+                                        color = MediumSlate,
                                         fontWeight = FontWeight.SemiBold
                                     )
-                                    Spacer(modifier = Modifier.height(3.dp))
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = AccountingEngine.formatCurrency(dashboardSummary.totalPayableMinor),
-                                        fontSize = 20.sp,
+                                        fontSize = 22.sp,
                                         fontWeight = FontWeight.ExtraBold,
                                         color = PayableRed
                                     )
@@ -178,7 +178,7 @@ fun HomeScreen(
 
                             HorizontalDivider(
                                 modifier = Modifier.padding(vertical = 14.dp),
-                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                                color = CardBorderLight
                             )
 
                             Row(
@@ -190,7 +190,7 @@ fun HomeScreen(
                                     text = "Net Ledger Balance",
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = DeepCharcoal
                                 )
                                 val netColor = when {
                                     dashboardSummary.netBalanceMinor > 0 -> ReceivableGreen
@@ -227,20 +227,24 @@ fun HomeScreen(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = { viewModel.onSearchQueryChange(it) },
-                    placeholder = { Text("Search customer by name or phone...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = DeepEmerald) },
+                    placeholder = { Text("Search customer by name or phone...", color = LightSlate) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = EmeraldPrimary) },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
-                                Icon(Icons.Default.Close, contentDescription = null)
+                                Icon(Icons.Default.Close, contentDescription = null, tint = MediumSlate)
                             }
                         }
                     },
                     singleLine = true,
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = DeepEmerald,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedBorderColor = EmeraldPrimary,
+                        unfocusedBorderColor = CardBorderLight,
+                        focusedTextColor = DeepCharcoal,
+                        unfocusedTextColor = DeepCharcoal
                     ),
                     modifier = Modifier.weight(1f)
                 )
@@ -254,9 +258,9 @@ fun HomeScreen(
                     },
                     modifier = Modifier
                         .size(52.dp)
-                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                        .background(Color.White, RoundedCornerShape(16.dp))
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort", tint = DeepEmerald)
+                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort", tint = EmeraldPrimary)
                 }
 
                 DropdownMenu(
@@ -272,7 +276,7 @@ fun HomeScreen(
                                     CustomerSort.LOWEST_BALANCE -> "Lowest Balance"
                                     CustomerSort.RECENTLY_UPDATED -> "Recently Updated"
                                 }
-                                Text(label, fontWeight = if (sort == selectedSort) FontWeight.Bold else FontWeight.Normal)
+                                Text(label, fontWeight = if (sort == selectedSort) FontWeight.Bold else FontWeight.Normal, color = DeepCharcoal)
                             },
                             onClick = {
                                 viewModel.onSortSelect(sort)
@@ -307,8 +311,16 @@ fun HomeScreen(
                         label = { Text(label, fontSize = 12.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium) },
                         shape = RoundedCornerShape(14.dp),
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = DeepEmerald,
+                            containerColor = Color.White,
+                            labelColor = DeepCharcoal,
+                            selectedContainerColor = EmeraldPrimary,
                             selectedLabelColor = Color.White
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            borderColor = CardBorderLight,
+                            selectedBorderColor = EmeraldPrimary,
+                            enabled = true,
+                            selected = isSelected
                         )
                     )
                 }
@@ -326,13 +338,13 @@ fun HomeScreen(
                         Icon(
                             Icons.Default.PeopleOutline,
                             contentDescription = null,
-                            tint = DeepEmerald.copy(alpha = 0.5f),
+                            tint = EmeraldPrimary.copy(alpha = 0.5f),
                             modifier = Modifier.size(56.dp)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = if (searchQuery.isNotEmpty()) "No customer matches your search." else "No customer accounts yet.\nTap '+ ADD CUSTOMER' to get started.",
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            color = MediumSlate,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -369,10 +381,10 @@ fun CustomerCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+        border = BorderStroke(1.dp, CardBorderLight)
     ) {
         Row(
             modifier = Modifier
@@ -404,13 +416,13 @@ fun CustomerCard(
                     text = summary.customer.name,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = DeepCharcoal
                 )
                 if (!summary.customer.phone.isNullOrEmpty()) {
                     Text(
                         text = summary.customer.phone,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        fontSize = 13.sp,
+                        color = LightSlate
                     )
                 }
                 if (summary.lastTransactionDate != null) {
@@ -418,7 +430,7 @@ fun CustomerCard(
                     Text(
                         text = "Last: $dateStr",
                         fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                        color = LightSlate
                     )
                 }
             }
@@ -432,7 +444,7 @@ fun CustomerCard(
                 }
 
                 Surface(
-                    color = amtColor.copy(alpha = 0.1f),
+                    color = amtColor.copy(alpha = 0.12f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(
@@ -442,7 +454,7 @@ fun CustomerCard(
                         Text(
                             text = AccountingEngine.formatCurrency(kotlin.math.abs(summary.netBalanceMinor)),
                             fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             color = amtColor
                         )
 

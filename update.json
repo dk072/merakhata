@@ -1,7 +1,7 @@
 {
-    "versionCode":  9,
-    "versionName":  "1.0.8",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.8.apk",
-    "releaseNotes":  "?? Default Update URL set permanently to GitHub raw repository!",
+    "versionCode":  10,
+    "versionName":  "1.0.9",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.9.apk",
+    "releaseNotes":  "? Ultra-Crisp Khatabook \u0026 OkCredit Clean Light Theme! Maximum Readability \u0026 High Contrast Cards.",
     "isMandatory":  false
 }

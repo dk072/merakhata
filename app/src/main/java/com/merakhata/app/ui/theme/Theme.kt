@@ -12,23 +12,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = ElectricEmerald,
-    secondary = InfoBlue,
-    tertiary = WarmGold,
-    background = BackgroundDark,
-    surface = SurfaceDark,
-    onPrimary = Color(0xFF064E3B),
-    onSecondary = Color.White,
-    onBackground = Color(0xFFF8FAFC),
-    onSurface = Color(0xFFF8FAFC),
-    outline = CardBorderDark,
-    surfaceVariant = Color(0xFF263353)
-)
-
 private val LightColorScheme = lightColorScheme(
-    primary = DeepEmerald,
-    secondary = EmeraldPrimary,
+    primary = EmeraldPrimary,
+    secondary = DeepEmerald,
     tertiary = WarmGold,
     background = BackgroundLight,
     surface = SurfaceLight,
@@ -40,9 +26,23 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = Color(0xFFF1F5F9)
 )
 
+private val DarkColorScheme = darkColorScheme(
+    primary = EmeraldPrimary,
+    secondary = DeepEmerald,
+    tertiary = WarmGold,
+    background = Color(0xFF0F172A),
+    surface = Color(0xFF1E293B),
+    onPrimary = Color.White,
+    onSecondary = Color.White,
+    onBackground = Color.White,
+    onSurface = Color.White,
+    outline = Color(0xFF334155),
+    surfaceVariant = Color(0xFF334155)
+)
+
 @Composable
 fun MeraKhataTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false, // Default to crisp light theme for maximum readability
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -55,8 +55,7 @@ fun MeraKhataTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            val statusBarColor = if (darkTheme) BackgroundDark else HeaderGradientStart
-            window.statusBarColor = statusBarColor.toArgb()
+            window.statusBarColor = HeaderGradientStart.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
         }
     }
