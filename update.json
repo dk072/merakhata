@@ -1,7 +1,7 @@
 {
-    "versionCode":  16,
-    "versionName":  "1.0.15",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.15.apk",
-    "releaseNotes":  "?? Real-Time Firebase Online Authentication \u0026 Real-Time Cloud Database Sync! Validates user password online and restores all ledgers across devices.",
+    "versionCode":  17,
+    "versionName":  "1.0.16",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.16.apk",
+    "releaseNotes":  "?? Real-Time Online Authentication \u0026 Cloud Sync Production Build! Live Firebase password validation and data restore.",
     "isMandatory":  false
 }

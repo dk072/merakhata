@@ -7,7 +7,6 @@ import com.merakhata.app.data.repository.KhataRepository
 import com.merakhata.app.domain.backup.BackupManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -60,9 +59,9 @@ object FirebaseRealtimeSyncEngine {
                     for (i in 0 until custArray.length()) {
                         val cObj = custArray.getJSONObject(i)
                         val name = cObj.getString("name")
-                        val phone = cObj.optString("phone", null)
-                        val address = cObj.optString("address", null)
-                        val notes = cObj.optString("notes", null)
+                        val phone = if (cObj.has("phone") && !cObj.isNull("phone")) cObj.getString("phone") else null
+                        val address = if (cObj.has("address") && !cObj.isNull("address")) cObj.getString("address") else null
+                        val notes = if (cObj.has("notes") && !cObj.isNull("notes")) cObj.getString("notes") else null
                         
                         repository.insertCustomer(
                             CustomerEntity(
@@ -84,7 +83,7 @@ object FirebaseRealtimeSyncEngine {
                         val customerId = tObj.getLong("customerId")
                         val typeStr = tObj.getString("type")
                         val amountMinor = tObj.getLong("amountMinor")
-                        val description = tObj.optString("description", null)
+                        val description = if (tObj.has("description") && !tObj.isNull("description")) tObj.getString("description") else null
                         val date = tObj.getLong("transactionDate")
 
                         repository.insertTransaction(
@@ -124,7 +123,7 @@ object FirebaseRealtimeSyncEngine {
             os.flush()
         }
 
-        val code = conn.responseCode
+        conn.responseCode
         conn.disconnect()
     }
 
