@@ -287,11 +287,12 @@ fun HomeScreen(
                 }
             }
 
-            // Filter Chips
+            // Filter Chips (Horizontally Scrollable for Mobile Responsiveness)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 CustomerFilter.values().forEach { filter ->

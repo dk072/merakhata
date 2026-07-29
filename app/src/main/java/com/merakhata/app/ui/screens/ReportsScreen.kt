@@ -2,6 +2,7 @@ package com.merakhata.app.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,13 +44,15 @@ fun ReportsScreen(viewModel: ReportsViewModel) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(MaterialTheme.colorScheme.background)
+                .background(BackgroundLight)
                 .verticalScroll(rememberScrollState())
-                .padding(20.dp)
+                .padding(16.dp)
         ) {
-            // Period Filter Chips
+            // Period Filter Chips (Horizontal Scrollable for 100% Mobile Responsiveness)
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 ReportPeriod.values().forEach { period ->
@@ -69,28 +72,37 @@ fun ReportsScreen(viewModel: ReportsViewModel) {
                         label = { Text(label, fontSize = 12.sp, fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium) },
                         shape = RoundedCornerShape(14.dp),
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = DeepEmerald,
+                            containerColor = Color.White,
+                            labelColor = DeepCharcoal,
+                            selectedContainerColor = EmeraldPrimary,
                             selectedLabelColor = Color.White
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            borderColor = CardBorderLight,
+                            selectedBorderColor = EmeraldPrimary,
+                            enabled = true,
+                            selected = isSelected
                         )
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Report Summary Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
+                border = BorderStroke(1.dp, CardBorderLight)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
                 ) {
-                    Text("Period Ledger Summary", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = DeepEmerald)
+                    Text("Period Ledger Summary", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = EmeraldPrimary)
 
                     Spacer(modifier = Modifier.height(18.dp))
 
@@ -100,7 +112,7 @@ fun ReportsScreen(viewModel: ReportsViewModel) {
                         color = PayableRed
                     )
 
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = CardBorderLight)
 
                     ReportMetricRow(
                         label = "Total Payment Received (YOU GOT)",
@@ -108,12 +120,12 @@ fun ReportsScreen(viewModel: ReportsViewModel) {
                         color = ReceivableGreen
                     )
 
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = CardBorderLight)
 
                     ReportMetricRow(
                         label = "Total Transactions Recorded",
                         amountStr = "${reportSummary.totalTransactionsCount} entries",
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = DeepCharcoal
                     )
                 }
             }
@@ -132,7 +144,7 @@ fun ReportMetricRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontWeight = FontWeight.Medium)
-        Text(amountStr, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = color)
+        Text(label, fontSize = 13.sp, color = MediumSlate, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+        Text(amountStr, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = color)
     }
 }

@@ -145,20 +145,13 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
 
     Scaffold(
         topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
-                    .background(PrimaryHeaderGradient)
-                    .padding(horizontal = 20.dp, vertical = 18.dp)
-            ) {
-                Text(
-                    text = "Settings & App Updates",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
+            TopAppBar(
+                title = { Text("Settings & App Updates", fontWeight = FontWeight.ExtraBold, color = Color.White) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = HeaderGradientStart,
+                    titleContentColor = Color.White
                 )
-            }
+            )
         }
     ) { padding ->
         Column(
@@ -258,9 +251,9 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth().height(48.dp)
                     ) {
-                        Icon(Icons.Default.SystemUpdate, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Check for App Updates", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Icon(Icons.Default.SystemUpdate, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Check for App Updates", fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1)
                     }
 
                     Spacer(modifier = Modifier.height(10.dp))
@@ -271,9 +264,9 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth().height(48.dp)
                     ) {
-                        Icon(Icons.Default.InstallMobile, contentDescription = null, tint = primaryColor)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Install Local APK File Directly", color = primaryColor, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        Icon(Icons.Default.InstallMobile, contentDescription = null, tint = primaryColor, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Install Local APK File Directly", color = primaryColor, fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1)
                     }
                 }
             }
@@ -326,13 +319,13 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                         modifier = Modifier.fillMaxWidth().height(48.dp)
                     ) {
                         if (syncState is SyncState.Syncing) {
-                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(22.dp))
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text("Syncing Data to Cloud...", fontWeight = FontWeight.Bold)
-                        } else {
-                            Icon(Icons.Default.CloudUpload, contentDescription = null)
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Sync Ledger Data to Cloud Now", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                            Text("Syncing Data to Cloud...", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        } else {
+                            Icon(Icons.Default.CloudUpload, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Sync Ledger Data to Cloud Now", fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1)
                         }
                     }
                 }
