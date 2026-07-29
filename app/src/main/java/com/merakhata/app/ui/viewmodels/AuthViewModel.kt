@@ -54,7 +54,7 @@ class AuthViewModel(private val repository: KhataRepository) : ViewModel() {
             repository.preferences.setCloudUserLogin(generatedId, trimmedEmail)
             
             // Trigger automatic Cloud Sync for logged-in user account
-            CloudSyncManager.triggerSync(repository)
+            CloudSyncManager.syncAll(repository)
 
             authState.value = AuthState.Success(trimmedEmail)
             onSuccess()
@@ -85,7 +85,7 @@ class AuthViewModel(private val repository: KhataRepository) : ViewModel() {
                 repository.preferences.updateProfile(ownerName.trim(), businessName.trim())
             }
 
-            CloudSyncManager.triggerSync(repository)
+            CloudSyncManager.syncAll(repository)
 
             authState.value = AuthState.Success(trimmedEmail)
             onSuccess()
