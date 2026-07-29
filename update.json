@@ -1,7 +1,7 @@
 {
-    "versionCode":  12,
-    "versionName":  "1.0.11",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.11.apk",
-    "releaseNotes":  "?? 100% Mobile Responsiveness Fix! Horizontal scrollable filter chips, aligned TopAppBar, and responsive buttons.",
+    "versionCode":  13,
+    "versionName":  "1.0.12",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.12.apk",
+    "releaseNotes":  "?? Push OTA Update: 100% Mobile Responsiveness \u0026 Crisp Khatabook Light Theme!",
     "isMandatory":  false
 }
