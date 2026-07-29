@@ -1,7 +1,6 @@
 package com.merakhata.app.domain.sync
 
 import com.merakhata.app.data.repository.KhataRepository
-import com.merakhata.app.domain.backup.BackupManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.StateFlow
@@ -32,13 +31,12 @@ object CloudSyncManager {
 
             val customers = repository.getAllCustomersList()
             val transactions = repository.getAllTransactionsList()
-            val reminders = repository.getActiveRemindersList()
 
             // Retrieve active logged-in userId
             val userId = repository.preferences.userId.firstOrNull() ?: "device_guest_user"
 
-            // Push to Firebase Realtime Cloud Database
-            FirebaseRealtimeSyncEngine.pushLocalDataToCloud(repository, userId)
+            // Push to Vercel/Render Cloud Database
+            CloudSyncEngine.pushLocalDataToCloud(repository, userId)
 
             val now = System.currentTimeMillis()
             val formatter = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault())

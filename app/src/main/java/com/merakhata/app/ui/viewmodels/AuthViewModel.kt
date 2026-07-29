@@ -3,10 +3,10 @@ package com.merakhata.app.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.merakhata.app.data.repository.KhataRepository
-import com.merakhata.app.domain.auth.AuthResult
-import com.merakhata.app.domain.auth.FirebaseAuthService
+import com.merakhata.app.domain.auth.CloudAuthResult
+import com.merakhata.app.domain.auth.CloudAuthService
+import com.merakhata.app.domain.sync.CloudSyncEngine
 import com.merakhata.app.domain.sync.CloudSyncManager
-import com.merakhata.app.domain.sync.FirebaseRealtimeSyncEngine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -42,29 +42,32 @@ class AuthViewModel(private val repository: KhataRepository) : ViewModel() {
             return
         }
 
-        if (trimmedPassword.length < 6) {
-            authState.value = AuthState.Error("Password must be at least 6 characters.")
+        if (trimmedPassword.length < 4) {
+            authState.value = AuthState.Error("Password must be at least 4 characters.")
             return
         }
 
         viewModelScope.launch {
             authState.value = AuthState.Loading
 
-            // Real-Time Online Authentication with Firebase Auth
-            when (val result = FirebaseAuthService.signIn(trimmedEmail, trimmedPassword)) {
-                is AuthResult.Success -> {
+            // Real-Time Online Authentication with Vercel/Render Cloud Auth Backend (No Firebase API Key required)
+            when (val result = CloudAuthService.signIn(trimmedEmail, trimmedPassword)) {
+                is CloudAuthResult.Success -> {
                     repository.preferences.setCloudUserLogin(result.userId, result.email)
+                    if (!result.ownerName.isNullOrEmpty()) {
+                        repository.preferences.updateProfile(result.ownerName, result.businessName ?: "")
+                    }
 
                     // Fetch existing cloud data for this user account & restore to local database
-                    FirebaseRealtimeSyncEngine.fetchCloudDataAndRestore(repository, result.userId)
+                    CloudSyncEngine.fetchCloudDataAndRestore(repository, result.userId)
                     // Push latest state to cloud
-                    FirebaseRealtimeSyncEngine.pushLocalDataToCloud(repository, result.userId)
+                    CloudSyncEngine.pushLocalDataToCloud(repository, result.userId)
                     CloudSyncManager.syncAll(repository)
 
                     authState.value = AuthState.Success(result.email)
                     onSuccess()
                 }
-                is AuthResult.Error -> {
+                is CloudAuthResult.Error -> {
                     authState.value = AuthState.Error(result.message)
                 }
             }
@@ -80,29 +83,29 @@ class AuthViewModel(private val repository: KhataRepository) : ViewModel() {
             return
         }
 
-        if (trimmedPassword.length < 6) {
-            authState.value = AuthState.Error("Password must be at least 6 characters.")
+        if (trimmedPassword.length < 4) {
+            authState.value = AuthState.Error("Password must be at least 4 characters.")
             return
         }
 
         viewModelScope.launch {
             authState.value = AuthState.Loading
 
-            // Real-Time Online Registration with Firebase Auth
-            when (val result = FirebaseAuthService.signUp(trimmedEmail, trimmedPassword)) {
-                is AuthResult.Success -> {
+            // Real-Time Online Account Registration with Vercel/Render Cloud Auth Backend
+            when (val result = CloudAuthService.signUp(trimmedEmail, trimmedPassword, ownerName, businessName)) {
+                is CloudAuthResult.Success -> {
                     repository.preferences.setCloudUserLogin(result.userId, result.email)
                     if (ownerName.isNotBlank()) {
                         repository.preferences.updateProfile(ownerName.trim(), businessName.trim())
                     }
 
-                    FirebaseRealtimeSyncEngine.pushLocalDataToCloud(repository, result.userId)
+                    CloudSyncEngine.pushLocalDataToCloud(repository, result.userId)
                     CloudSyncManager.syncAll(repository)
 
                     authState.value = AuthState.Success(result.email)
                     onSuccess()
                 }
-                is AuthResult.Error -> {
+                is CloudAuthResult.Error -> {
                     authState.value = AuthState.Error(result.message)
                 }
             }
