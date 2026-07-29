@@ -43,8 +43,12 @@ val CardBorderLight = Color(0xFFE2E8F0)     // Subtle Card Border Light
 val CardBorderDark = Color(0xFF334155)      // Subtle Card Border Dark
 
 // Gradients
+val HeaderGradientStart = Color(0xFF064E3B)
+val HeaderGradientCenter = Color(0xFF047857)
+val HeaderGradientEnd = Color(0xFF0D9488)
+
 val PrimaryHeaderGradient = Brush.horizontalGradient(
-    colors = listOf(Color(0xFF064E3B), Color(0xFF047857), Color(0xFF0D9488))
+    colors = listOf(HeaderGradientStart, HeaderGradientCenter, HeaderGradientEnd)
 )
 
 val ActionGaveGradient = Brush.horizontalGradient(
