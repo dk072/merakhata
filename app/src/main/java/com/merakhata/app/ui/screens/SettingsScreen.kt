@@ -312,7 +312,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                         Icon(
                             imageVector = Icons.Default.CloudDone,
                             contentDescription = "Cloud Status",
-                            tint = if (syncState is SyncState.Success) GreenReceived else primaryColor
+                            tint = if (syncState is SyncState.Success) GreenReceivable else primaryColor
                         )
                     }
 
