@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
 
+import com.merakhata.app.domain.sync.CloudSyncManager
+import com.merakhata.app.domain.sync.SyncState
+
 class SettingsViewModel(private val repository: KhataRepository) : ViewModel() {
 
     val ownerName: StateFlow<String> = repository.preferences.ownerName
@@ -38,6 +41,8 @@ class SettingsViewModel(private val repository: KhataRepository) : ViewModel() {
     val autoCheckUpdates: StateFlow<Boolean> = repository.preferences.autoCheckUpdates
         .stateIn(viewModelScope, SharingStarted.Lazily, true)
 
+    val syncState: StateFlow<SyncState> = CloudSyncManager.syncState
+
     private val _updateStatus = MutableStateFlow<UpdateStatus>(UpdateStatus.Idle)
     val updateStatus: StateFlow<UpdateStatus> = _updateStatus
 
@@ -46,6 +51,17 @@ class SettingsViewModel(private val repository: KhataRepository) : ViewModel() {
 
     private val _statusMessage = MutableStateFlow<String?>(null)
     val statusMessage: StateFlow<String?> = _statusMessage
+
+    fun triggerCloudSync() {
+        viewModelScope.launch {
+            val success = CloudSyncManager.syncAll(repository)
+            if (success) {
+                _statusMessage.value = "Cloud Sync completed successfully!"
+            } else {
+                _statusMessage.value = "Cloud Sync failed. Please check internet connection."
+            }
+        }
+    }
 
     fun updateProfile(owner: String, business: String) {
         viewModelScope.launch {

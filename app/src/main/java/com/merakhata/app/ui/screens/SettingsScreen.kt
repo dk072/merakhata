@@ -33,6 +33,8 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 
+import com.merakhata.app.domain.sync.SyncState
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel) {
@@ -45,6 +47,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
     val updateUrl by viewModel.updateUrl.collectAsState()
     val autoCheckUpdates by viewModel.autoCheckUpdates.collectAsState()
     val updateStatus by viewModel.updateStatus.collectAsState()
+    val syncState by viewModel.syncState.collectAsState()
     val backupSummary by viewModel.backupSummary.collectAsState()
     val statusMessage by viewModel.statusMessage.collectAsState()
 
@@ -271,6 +274,66 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                         Icon(Icons.Default.InstallMobile, contentDescription = null, tint = primaryColor)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Install Local APK File Directly", color = primaryColor, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    }
+                }
+            }
+
+            // Cloud Database Backup & Sync Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Cloud Database Sync",
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = primaryColor
+                            )
+                            Text(
+                                text = when (val s = syncState) {
+                                    is SyncState.Idle -> "Status: Ready to Sync"
+                                    is SyncState.Syncing -> "Status: Syncing in progress..."
+                                    is SyncState.Success -> "Last Synced: ${s.formattedTime}"
+                                    is SyncState.Error -> "Status: Sync Error"
+                                },
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.CloudDone,
+                            contentDescription = "Cloud Status",
+                            tint = if (syncState is SyncState.Success) GreenReceived else primaryColor
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Button(
+                        onClick = { viewModel.triggerCloudSync() },
+                        enabled = syncState !is SyncState.Syncing,
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor, contentColor = Color.White),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                    ) {
+                        if (syncState is SyncState.Syncing) {
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(22.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text("Syncing Data to Cloud...", fontWeight = FontWeight.Bold)
+                        } else {
+                            Icon(Icons.Default.CloudUpload, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Sync Ledger Data to Cloud Now", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        }
                     }
                 }
             }

@@ -1,7 +1,7 @@
 {
-    "versionCode":  4,
-    "versionName":  "1.0.3",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.3.apk",
-    "releaseNotes":  "?? APK Build v1.0.3 Live \u0026 Deployed on GitHub OTA Server!",
+    "versionCode":  5,
+    "versionName":  "1.0.4",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.4.apk",
+    "releaseNotes":  "?? Cloud Database Sync Added! Real-time \u0026 1-click cloud sync for ledgers and transactions.",
     "isMandatory":  false
 }
