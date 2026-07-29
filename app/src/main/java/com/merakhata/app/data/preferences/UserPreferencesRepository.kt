@@ -22,6 +22,9 @@ class UserPreferencesRepository(private val context: Context) {
         private val KEY_THEME_MODE = stringPreferencesKey("theme_mode") // "SYSTEM", "LIGHT", "DARK"
         private val KEY_UPDATE_URL = stringPreferencesKey("update_url")
         private val KEY_AUTO_CHECK_UPDATES = booleanPreferencesKey("auto_check_updates")
+        private val KEY_USER_ID = stringPreferencesKey("user_id")
+        private val KEY_USER_EMAIL = stringPreferencesKey("user_email")
+        private val KEY_IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
     }
 
     val isOnboardingCompleted: Flow<Boolean> = context.dataStore.data.map { preferences ->
@@ -53,7 +56,7 @@ class UserPreferencesRepository(private val context: Context) {
     }
 
     val themeMode: Flow<String> = context.dataStore.data.map { preferences ->
-        preferences[KEY_THEME_MODE] ?: "SYSTEM"
+        preferences[KEY_THEME_MODE] ?: "LIGHT"
     }
 
     val updateUrl: Flow<String> = context.dataStore.data.map { preferences ->
@@ -69,6 +72,18 @@ class UserPreferencesRepository(private val context: Context) {
         preferences[KEY_AUTO_CHECK_UPDATES] ?: true
     }
 
+    val userId: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[KEY_USER_ID]
+    }
+
+    val userEmail: Flow<String?> = context.dataStore.data.map { preferences ->
+        preferences[KEY_USER_EMAIL]
+    }
+
+    val isLoggedIn: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[KEY_IS_LOGGED_IN] ?: false
+    }
+
     suspend fun setOnboardingCompleted(completed: Boolean, owner: String, business: String) {
         context.dataStore.edit { preferences ->
             preferences[KEY_ONBOARDING_COMPLETED] = completed
@@ -81,6 +96,22 @@ class UserPreferencesRepository(private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences[KEY_OWNER_NAME] = owner
             preferences[KEY_BUSINESS_NAME] = business
+        }
+    }
+
+    suspend fun setCloudUserLogin(id: String, email: String) {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_USER_ID] = id
+            preferences[KEY_USER_EMAIL] = email
+            preferences[KEY_IS_LOGGED_IN] = true
+        }
+    }
+
+    suspend fun logoutCloudUser() {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_IS_LOGGED_IN] = false
+            preferences.remove(KEY_USER_ID)
+            preferences.remove(KEY_USER_EMAIL)
         }
     }
 

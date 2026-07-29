@@ -41,6 +41,12 @@ class SettingsViewModel(private val repository: KhataRepository) : ViewModel() {
     val autoCheckUpdates: StateFlow<Boolean> = repository.preferences.autoCheckUpdates
         .stateIn(viewModelScope, SharingStarted.Lazily, true)
 
+    val isLoggedIn: StateFlow<Boolean> = repository.preferences.isLoggedIn
+        .stateIn(viewModelScope, SharingStarted.Lazily, false)
+
+    val userEmail: StateFlow<String?> = repository.preferences.userEmail
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
     val syncState: StateFlow<SyncState> = CloudSyncManager.syncState
 
     private val _updateStatus = MutableStateFlow<UpdateStatus>(UpdateStatus.Idle)

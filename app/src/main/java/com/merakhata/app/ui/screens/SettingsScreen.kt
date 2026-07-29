@@ -37,7 +37,10 @@ import com.merakhata.app.domain.sync.SyncState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel,
+    onNavigateToAuth: () -> Unit = {}
+) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val ownerName by viewModel.ownerName.collectAsState()
@@ -50,6 +53,8 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
     val syncState by viewModel.syncState.collectAsState()
     val backupSummary by viewModel.backupSummary.collectAsState()
     val statusMessage by viewModel.statusMessage.collectAsState()
+    val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+    val userEmail by viewModel.userEmail.collectAsState()
 
     var ownerInput by remember(ownerName) { mutableStateOf(ownerName) }
     var businessInput by remember(businessName) { mutableStateOf(businessName) }
@@ -163,6 +168,61 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Cloud User Account & Login Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Cloud Account & Sync",
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = primaryColor
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = if (isLoggedIn) "Logged in as ${userEmail ?: "Cloud Account"}" else "Not logged in (100% Offline Mode)",
+                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                        }
+
+                        Icon(
+                            imageVector = if (isLoggedIn) Icons.Default.CloudDone else Icons.Default.CloudOff,
+                            contentDescription = null,
+                            tint = if (isLoggedIn) GreenReceivable else primaryColor
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Button(
+                        onClick = onNavigateToAuth,
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor, contentColor = Color.White),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth().height(46.dp)
+                    ) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (isLoggedIn) "Manage Cloud Account" else "Log In / Register Cloud Account",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
+
             // Profile Card
             Card(
                 modifier = Modifier.fillMaxWidth(),

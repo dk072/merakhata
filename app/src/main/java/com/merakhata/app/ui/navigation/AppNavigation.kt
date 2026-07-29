@@ -170,9 +170,21 @@ fun AppNavigation(navController: NavHostController = rememberNavController()) {
                 RemindersScreen(viewModel = vm)
             }
 
+            composable(NavRoutes.Auth.route) {
+                val vm = remember { AuthViewModel(repository) }
+                AuthScreen(
+                    viewModel = vm,
+                    onNavigateBack = { navController.popBackStack() },
+                    onAuthSuccess = { navController.popBackStack() }
+                )
+            }
+
             composable(NavRoutes.Settings.route) {
                 val vm = remember { SettingsViewModel(repository) }
-                SettingsScreen(viewModel = vm)
+                SettingsScreen(
+                    viewModel = vm,
+                    onNavigateToAuth = { navController.navigate(NavRoutes.Auth.route) }
+                )
             }
 
             composable(

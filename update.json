@@ -1,7 +1,7 @@
 {
-    "versionCode":  13,
-    "versionName":  "1.0.12",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.12.apk",
-    "releaseNotes":  "?? Push OTA Update: 100% Mobile Responsiveness \u0026 Crisp Khatabook Light Theme!",
+    "versionCode":  14,
+    "versionName":  "1.0.13",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.13.apk",
+    "releaseNotes":  "?? Cloud Account Login \u0026 Sync Feature! Sign in to sync your ledger safely to the Cloud.",
     "isMandatory":  false
 }

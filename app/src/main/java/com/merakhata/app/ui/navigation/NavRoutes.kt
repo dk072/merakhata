@@ -3,6 +3,7 @@ package com.merakhata.app.ui.navigation
 sealed class NavRoutes(val route: String) {
     object Onboarding : NavRoutes("onboarding")
     object PinLock : NavRoutes("pin_lock")
+    object Auth : NavRoutes("auth")
     object Home : NavRoutes("home")
     object Reports : NavRoutes("reports")
     object Reminders : NavRoutes("reminders")
