@@ -2,6 +2,7 @@ package com.merakhata.app.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,7 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +44,7 @@ fun CustomerDetailScreen(
     onNavigateToAddTransaction: (Long, String, Long?) -> Unit
 ) {
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
     val customer by viewModel.customer.collectAsState()
     val summary by viewModel.summary.collectAsState()
     val transactions by viewModel.transactions.collectAsState()
@@ -51,7 +55,7 @@ fun CustomerDetailScreen(
 
     if (customer == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = GreenPrimary)
+            CircularProgressIndicator(color = DeepEmerald)
         }
         return
     }
@@ -61,15 +65,25 @@ fun CustomerDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(cust.name, fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        text = cust.name,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 19.sp,
+                        color = Color.White
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onNavigateBack()
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 actions = {
                     IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Options")
+                        Icon(Icons.Default.MoreVert, contentDescription = "Options", tint = Color.White)
                     }
                     DropdownMenu(
                         expanded = showMenu,
@@ -77,7 +91,7 @@ fun CustomerDetailScreen(
                     ) {
                         DropdownMenuItem(
                             text = { Text("Generate PDF Statement") },
-                            leadingIcon = { Icon(Icons.Default.PictureAsPdf, contentDescription = null) },
+                            leadingIcon = { Icon(Icons.Default.PictureAsPdf, contentDescription = null, tint = DeepEmerald) },
                             onClick = {
                                 showMenu = false
                                 viewModel.generateAndSharePdf(context)
@@ -85,7 +99,7 @@ fun CustomerDetailScreen(
                         )
                         DropdownMenuItem(
                             text = { Text("Share Text Summary") },
-                            leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) },
+                            leadingIcon = { Icon(Icons.Default.Share, contentDescription = null, tint = DeepEmerald) },
                             onClick = {
                                 showMenu = false
                                 val text = viewModel.generateShareSummaryText()
@@ -98,15 +112,15 @@ fun CustomerDetailScreen(
                         )
                         DropdownMenuItem(
                             text = { Text("Edit Customer Profile") },
-                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
+                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null, tint = DeepEmerald) },
                             onClick = {
                                 showMenu = false
                                 onNavigateToEditCustomer(cust.id)
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Delete Customer", color = RedPayable) },
-                            leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = RedPayable) },
+                            text = { Text("Delete Customer", color = PayableRed, fontWeight = FontWeight.Bold) },
+                            leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = PayableRed) },
                             onClick = {
                                 showMenu = false
                                 showDeleteCustDialog = true
@@ -121,6 +135,51 @@ fun CustomerDetailScreen(
                     actionIconContentColor = Color.White
                 )
             )
+        },
+        bottomBar = {
+            // Sticky Bottom Action Buttons: YOU GAVE & YOU GOT
+            Surface(
+                tonalElevation = 8.dp,
+                shadowElevation = 10.dp,
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(ActionGaveGradient)
+                            .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onNavigateToAddTransaction(cust.id, "YOU_GAVE", null)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("YOU GAVE ₹", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = 0.5.sp)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(ActionGotGradient)
+                            .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onNavigateToAddTransaction(cust.id, "YOU_GOT", null)
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("YOU GOT ₹", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = 0.5.sp)
+                    }
+                }
+            }
         }
     ) { padding ->
         Column(
@@ -134,7 +193,7 @@ fun CustomerDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(PrimaryHeaderGradient)
-                    .padding(20.dp),
+                    .padding(horizontal = 20.dp, vertical = 20.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -146,16 +205,17 @@ fun CustomerDetailScreen(
                     Text(
                         text = "Current Account Balance",
                         fontSize = 12.sp,
-                        color = Color.White.copy(alpha = 0.85f)
+                        color = Color.White.copy(alpha = 0.85f),
+                        fontWeight = FontWeight.Medium
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = AccountingEngine.formatCurrency(kotlin.math.abs(summary?.netBalanceMinor ?: 0L)),
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 34.sp,
+                        fontWeight = FontWeight.ExtraBold,
                         color = Color.White
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
                     Surface(
                         color = Color.White.copy(alpha = 0.2f),
                         shape = RoundedCornerShape(12.dp)
@@ -165,25 +225,26 @@ fun CustomerDetailScreen(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 5.dp)
                         )
                     }
 
-                    // Call / SMS Quick Action Buttons
-                    if (!cust.phone.isNull_or_blank()) {
-                        Spacer(modifier = Modifier.height(14.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    // Call / SMS / WhatsApp Quick Action Buttons
+                    if (!cust.phone.isNullOrEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Button(
                                 onClick = {
                                     val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${cust.phone}"))
                                     context.startActivity(intent)
                                 },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.25f)),
-                                shape = RoundedCornerShape(12.dp)
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.22f)),
+                                shape = RoundedCornerShape(12.dp),
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                             ) {
                                 Icon(Icons.Default.Call, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Call", color = Color.White, fontWeight = FontWeight.Bold)
+                                Text("Call", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                             }
 
                             Button(
@@ -195,58 +256,41 @@ fun CustomerDetailScreen(
                                     }
                                     context.startActivity(intent)
                                 },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.25f)),
-                                shape = RoundedCornerShape(12.dp)
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.22f)),
+                                shape = RoundedCornerShape(12.dp),
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                             ) {
                                 Icon(Icons.AutoMirrored.Filled.Message, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Message", color = Color.White, fontWeight = FontWeight.Bold)
+                                Text("SMS", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                             }
                         }
                     }
                 }
             }
 
-            // Big Action Buttons: YOU GAVE & YOU GOT with Rich Gradient
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Transaction History Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(ActionGaveGradient)
-                        .clickable { onNavigateToAddTransaction(cust.id, "YOU_GAVE", null) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("YOU GAVE ₹", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                }
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(ActionGotGradient)
-                        .clickable { onNavigateToAddTransaction(cust.id, "YOU_GOT", null) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("YOU GOT ₹", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                }
+                Text(
+                    text = "Transaction History",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "${transactions.size} records",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
             }
-
-            // Transaction History Header
-            Text(
-                text = "Transaction History",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Gray,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-            )
 
             // Timeline List
             if (transactions.isEmpty()) {
@@ -256,13 +300,27 @@ fun CustomerDetailScreen(
                         .padding(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No transactions recorded yet.", color = Color.Gray)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.ReceiptLong,
+                            contentDescription = null,
+                            tint = DeepEmerald.copy(alpha = 0.4f),
+                            modifier = Modifier.size(52.dp)
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = "No transactions recorded yet.\nTap 'YOU GAVE ₹' or 'YOU GOT ₹' below to add.",
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             } else {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 16.dp),
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(transactions, key = { it.id }) { tx ->
@@ -281,16 +339,17 @@ fun CustomerDetailScreen(
     if (showDeleteCustDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteCustDialog = false },
-            title = { Text("Delete Customer Account?") },
+            title = { Text("Delete Customer Account?", fontWeight = FontWeight.Bold) },
             text = { Text("Are you sure you want to delete ${cust.name}? All associated transaction history will be permanently deleted.") },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         showDeleteCustDialog = false
                         viewModel.deleteCustomer(onDeleted = onNavigateBack)
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = PayableRed)
                 ) {
-                    Text("Delete", color = RedPayable, fontWeight = FontWeight.Bold)
+                    Text("Delete Permanently", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -304,16 +363,17 @@ fun CustomerDetailScreen(
     if (selectedTxForDelete != null) {
         AlertDialog(
             onDismissRequest = { selectedTxForDelete = null },
-            title = { Text("Delete Transaction?") },
+            title = { Text("Delete Transaction?", fontWeight = FontWeight.Bold) },
             text = { Text("Are you sure you want to delete this transaction record? Account balance will be recalculated.") },
             confirmButton = {
-                TextButton(
+                Button(
                     onClick = {
                         viewModel.deleteTransaction(selectedTxForDelete!!)
                         selectedTxForDelete = null
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = PayableRed)
                 ) {
-                    Text("Delete", color = RedPayable, fontWeight = FontWeight.Bold)
+                    Text("Delete Record", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -338,9 +398,10 @@ fun TransactionItemCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isGave) RedLight else GreenLight
+            containerColor = if (isGave) LightPayableBg else LightReceivableBg
         ),
-        shape = RoundedCornerShape(14.dp)
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, if (isGave) PayableRed.copy(alpha = 0.2f) else ReceivableGreen.copy(alpha = 0.2f))
     ) {
         Column(
             modifier = Modifier
@@ -354,22 +415,22 @@ fun TransactionItemCard(
             ) {
                 Column {
                     Surface(
-                        color = if (isGave) RedPayable.copy(alpha = 0.15f) else GreenReceivable.copy(alpha = 0.15f),
+                        color = if (isGave) PayableRed.copy(alpha = 0.15f) else ReceivableGreen.copy(alpha = 0.15f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            text = if (isGave) "YOU GAVE" else "YOU GOT",
+                            text = if (isGave) "YOU GAVE (DEBIT)" else "YOU GOT (CREDIT)",
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (isGave) RedPayable else GreenReceivable,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            fontWeight = FontWeight.ExtraBold,
+                            color = if (isGave) PayableRed else ReceivableGreen,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "$dateStr, $timeStr",
                         fontSize = 11.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
 
@@ -377,31 +438,32 @@ fun TransactionItemCard(
                     Text(
                         text = AccountingEngine.formatCurrency(tx.amountMinor),
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isGave) RedPayable else GreenReceivable
+                        fontWeight = FontWeight.ExtraBold,
+                        color = if (isGave) PayableRed else ReceivableGreen
                     )
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
 
-                    IconButton(onClick = onEdit, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(16.dp))
+                    IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
                     }
-                    IconButton(onClick = onDelete, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(16.dp), tint = RedPayable)
+                    IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(16.dp), tint = PayableRed)
                     }
                 }
             }
 
-            if (!tx.description.isNull_or_blank()) {
+            if (!tx.description.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider(color = (if (isGave) PayableRed else ReceivableGreen).copy(alpha = 0.15f))
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = tx.description!!,
+                    text = tx.description,
                     fontSize = 13.sp,
-                    color = Color.DarkGray
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+                    fontWeight = FontWeight.Medium
                 )
             }
         }
     }
 }
-
-private fun String?.isNull_or_blank(): Boolean = this == null || this.trim().isEmpty()

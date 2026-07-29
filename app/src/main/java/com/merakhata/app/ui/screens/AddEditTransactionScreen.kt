@@ -2,6 +2,7 @@ package com.merakhata.app.ui.screens
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,7 +19,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,6 +41,7 @@ fun AddEditTransactionScreen(
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
     val amountInput by viewModel.amountInput.collectAsState()
     val type by viewModel.type.collectAsState()
     val description by viewModel.description.collectAsState()
@@ -46,7 +50,7 @@ fun AddEditTransactionScreen(
     val isSaving by viewModel.isSaving.collectAsState()
 
     val isGave = type == TransactionType.YOU_GAVE
-    val themeColor = if (isGave) RedPayable else GreenReceivable
+    val themeColor = if (isGave) PayableRed else ReceivableGreen
 
     val calendar = remember { Calendar.getInstance() }
 
@@ -84,10 +88,13 @@ fun AddEditTransactionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isGave) "You Gave Money/Goods" else "You Got Payment", fontWeight = FontWeight.Bold) },
+                title = { Text(if (isGave) "You Gave (Debit Record)" else "You Got (Credit Record)", fontWeight = FontWeight.ExtraBold, color = Color.White) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onNavigateBack()
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -111,99 +118,145 @@ fun AddEditTransactionScreen(
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Type Selector Tabs
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.LightGray.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
-                        .padding(4.dp)
+                // Type Selector Segmented Tabs
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Box(
+                    Row(
                         modifier = Modifier
-                            .weight(1f)
-                            .height(44.dp)
-                            .background(if (isGave) RedPayable else Color.Transparent, RoundedCornerShape(10.dp))
-                            .clickable { viewModel.onTypeChange(TransactionType.YOU_GAVE) },
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .padding(4.dp)
                     ) {
-                        Text("YOU GAVE", fontWeight = FontWeight.Bold, color = if (isGave) Color.White else Color.Gray)
-                    }
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(46.dp)
+                                .background(if (isGave) PayableRed else Color.Transparent, RoundedCornerShape(12.dp))
+                                .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    viewModel.onTypeChange(TransactionType.YOU_GAVE)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("YOU GAVE (DEBIT)", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = if (isGave) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                        }
 
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(44.dp)
-                            .background(if (!isGave) GreenReceivable else Color.Transparent, RoundedCornerShape(10.dp))
-                            .clickable { viewModel.onTypeChange(TransactionType.YOU_GOT) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("YOU GOT", fontWeight = FontWeight.Bold, color = if (!isGave) Color.White else Color.Gray)
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(46.dp)
+                                .background(if (!isGave) ReceivableGreen else Color.Transparent, RoundedCornerShape(12.dp))
+                                .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    viewModel.onTypeChange(TransactionType.YOU_GOT)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("YOU GOT (CREDIT)", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = if (!isGave) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                        }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // Display Amount
-                Text("Enter Amount", fontSize = 14.sp, color = Color.Gray)
-                Text(
-                    text = "₹${amountInput.ifEmpty { "0" }}",
-                    fontSize = 38.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = themeColor
-                )
-
-                if (amountError != null) {
-                    Text(amountError!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Date & Time Selectors
-                Row(
+                // Display Amount Card
+                Card(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(20.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                 ) {
-                    val dateStr = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(transactionDate))
-                    val timeStr = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(transactionDate))
-
-                    OutlinedButton(
-                        onClick = { showDatePicker() },
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.weight(1f)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(dateStr, fontSize = 12.sp)
-                    }
+                        Text("Enter Amount", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontWeight = FontWeight.Medium)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "₹${amountInput.ifEmpty { "0" }}",
+                            fontSize = 40.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = themeColor
+                        )
 
-                    OutlinedButton(
-                        onClick = { showTimePicker() },
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(timeStr, fontSize = 12.sp)
+                        if (amountError != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(amountError!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Description Field
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { viewModel.onDescriptionChange(it) },
-                    label = { Text("Description / Items / Notes") },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = null) },
-                    shape = RoundedCornerShape(14.dp),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                // Date & Time Selectors Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(20.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            val dateStr = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(transactionDate))
+                            val timeStr = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(transactionDate))
+
+                            OutlinedButton(
+                                onClick = { showDatePicker() },
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(16.dp), tint = themeColor)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(dateStr, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+
+                            OutlinedButton(
+                                onClick = { showTimePicker() },
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(16.dp), tint = themeColor)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(timeStr, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Description Field
+                        OutlinedTextField(
+                            value = description,
+                            onValueChange = { viewModel.onDescriptionChange(it) },
+                            label = { Text("Description / Bill Details / Notes") },
+                            leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = null, tint = themeColor) },
+                            shape = RoundedCornerShape(14.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = themeColor,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
 
             // Custom Keypad Component
             NumericKeypad(
-                onKeyClick = { char -> viewModel.onAmountInput(char) },
-                onSave = { viewModel.saveTransaction(onSuccess = onNavigateBack) },
+                onKeyClick = { char ->
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    viewModel.onAmountInput(char)
+                },
+                onSave = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    viewModel.saveTransaction(onSuccess = onNavigateBack)
+                },
                 isSaving = isSaving,
                 themeColor = themeColor
             )
@@ -225,7 +278,7 @@ fun NumericKeypad(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
+                .padding(12.dp)
         ) {
             val keys = listOf(
                 listOf("1", "2", "3"),
@@ -237,7 +290,7 @@ fun NumericKeypad(
             keys.forEach { row ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     row.forEach { key ->
                         Box(
@@ -245,12 +298,12 @@ fun NumericKeypad(
                                 .weight(1f)
                                 .height(54.dp)
                                 .padding(2.dp)
-                                .background(Color.LightGray.copy(alpha = 0.2f), RoundedCornerShape(10.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
                                 .clickable { onKeyClick(key) },
                             contentAlignment = Alignment.Center
                         ) {
                             if (key == "BACKSPACE") {
-                                Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = "Backspace", tint = Color.DarkGray)
+                                Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = "Backspace", tint = MaterialTheme.colorScheme.onSurface)
                             } else {
                                 Text(key, fontSize = 22.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                             }
@@ -259,13 +312,13 @@ fun NumericKeypad(
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Button(
                 onClick = onSave,
                 enabled = !isSaving,
                 colors = ButtonDefaults.buttonColors(containerColor = themeColor),
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
@@ -273,7 +326,7 @@ fun NumericKeypad(
                 if (isSaving) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
-                    Text("SAVE TRANSACTION", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text("SAVE TRANSACTION", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = 0.5.sp)
                 }
             }
         }

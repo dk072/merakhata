@@ -1,7 +1,7 @@
 {
-    "versionCode":  6,
-    "versionName":  "1.0.5",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.5.apk",
-    "releaseNotes":  "?? Cloud Database Sync Added! Real-time \u0026 1-click cloud sync for ledgers and transactions.",
+    "versionCode":  7,
+    "versionName":  "1.0.6",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.6.apk",
+    "releaseNotes":  "? Complete Premium Mobile UI/UX Overhaul! Modern Fintech Theme, Tactile Buttons, Haptic Feedback \u0026 Clean Cards.",
     "isMandatory":  false
 }

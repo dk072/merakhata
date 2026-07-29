@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.filled.Fingerprint
@@ -15,11 +14,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.merakhata.app.ui.theme.GreenPrimary
-import com.merakhata.app.ui.theme.RedPayable
+import com.merakhata.app.ui.theme.DeepEmerald
+import com.merakhata.app.ui.theme.PayableRed
 import com.merakhata.app.ui.viewmodels.SecurityViewModel
 
 @Composable
@@ -27,6 +28,7 @@ fun PinLockScreen(
     viewModel: SecurityViewModel,
     onUnlocked: () -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     val pinInput by viewModel.pinInput.collectAsState()
     val isUnlocked by viewModel.isUnlocked.collectAsState()
     val error by viewModel.error.collectAsState()
@@ -49,27 +51,35 @@ fun PinLockScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Lock,
-                contentDescription = "Lock",
-                tint = GreenPrimary,
-                modifier = Modifier.size(64.dp)
-            )
+            Surface(
+                color = DeepEmerald.copy(alpha = 0.12f),
+                shape = CircleShape,
+                modifier = Modifier.size(80.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = "Lock",
+                        tint = DeepEmerald,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                text = "Mera Khata Locked",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = GreenPrimary
+                text = "Mera Khata Security",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = DeepEmerald
             )
 
             Text(
-                text = "Enter 4-Digit PIN to unlock",
+                text = "Enter 4-Digit Security PIN to Unlock",
                 fontSize = 14.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(top = 4.dp, bottom = 24.dp)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier.padding(top = 4.dp, bottom = 28.dp)
             )
 
             // PIN Indicator Dots
@@ -83,14 +93,14 @@ fun PinLockScreen(
                         modifier = Modifier
                             .size(18.dp)
                             .clip(CircleShape)
-                            .background(if (isFilled) GreenPrimary else Color.LightGray)
+                            .background(if (isFilled) DeepEmerald else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
                     )
                 }
             }
 
             if (error != null) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(error!!, color = RedPayable, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(modifier = Modifier.height(14.dp))
+                Text(error!!, color = PayableRed, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(36.dp))
@@ -113,8 +123,9 @@ fun PinLockScreen(
                             modifier = Modifier
                                 .size(64.dp)
                                 .clip(CircleShape)
-                                .background(Color.LightGray.copy(alpha = 0.2f))
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
                                 .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     if (key == "BACKSPACE") {
                                         viewModel.onBackspace()
                                     } else if (key == "BIOMETRIC") {
@@ -128,13 +139,13 @@ fun PinLockScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             if (key == "BACKSPACE") {
-                                Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = "Backspace")
+                                Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = "Backspace", tint = MaterialTheme.colorScheme.onSurface)
                             } else if (key == "BIOMETRIC") {
                                 if (isBiometricEnabled) {
-                                    Icon(Icons.Default.Fingerprint, contentDescription = "Biometric", tint = GreenPrimary)
+                                    Icon(Icons.Default.Fingerprint, contentDescription = "Biometric", tint = DeepEmerald)
                                 }
                             } else {
-                                Text(key, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                                Text(key, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
                             }
                         }
                     }

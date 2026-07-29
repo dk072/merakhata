@@ -2,6 +2,7 @@ package com.merakhata.app.ui.screens
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,14 +17,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.merakhata.app.domain.accounting.AccountingEngine
-import com.merakhata.app.ui.theme.GreenPrimary
+import com.merakhata.app.ui.theme.DeepEmerald
 import com.merakhata.app.ui.theme.HeaderGradientStart
-import com.merakhata.app.ui.theme.RedPayable
+import com.merakhata.app.ui.theme.PayableRed
+import com.merakhata.app.ui.theme.WarmGold
 import com.merakhata.app.ui.viewmodels.ReminderItem
 import com.merakhata.app.ui.viewmodels.RemindersViewModel
 import java.text.SimpleDateFormat
@@ -35,6 +39,7 @@ import java.util.Locale
 @Composable
 fun RemindersScreen(viewModel: RemindersViewModel) {
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
     val reminderItems by viewModel.reminderItems.collectAsState()
     val customers by viewModel.customers.collectAsState()
 
@@ -43,7 +48,7 @@ fun RemindersScreen(viewModel: RemindersViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Payment Reminders", fontWeight = FontWeight.Bold) },
+                title = { Text("Payment Reminders", fontWeight = FontWeight.ExtraBold, color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = HeaderGradientStart,
                     titleContentColor = Color.White
@@ -52,11 +57,16 @@ fun RemindersScreen(viewModel: RemindersViewModel) {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showAddDialog = true },
-                containerColor = GreenPrimary,
-                contentColor = Color.White
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showAddDialog = true
+                },
+                containerColor = DeepEmerald,
+                contentColor = Color.White,
+                shape = RoundedCornerShape(20.dp),
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Reminder")
+                Icon(Icons.Default.Add, contentDescription = "Add Reminder", tint = Color.White)
             }
         }
     ) { padding ->
@@ -74,17 +84,34 @@ fun RemindersScreen(viewModel: RemindersViewModel) {
                         .padding(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No payment reminders scheduled.\nTap '+' to add a reminder.", color = Color.Gray)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.Alarm,
+                            contentDescription = null,
+                            tint = DeepEmerald.copy(alpha = 0.4f),
+                            modifier = Modifier.size(52.dp)
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = "No payment reminders scheduled.\nTap '+' to add a reminder.",
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     items(reminderItems, key = { it.reminder.id }) { item ->
                         ReminderCard(
                             item = item,
-                            onDelete = { viewModel.deleteReminder(context, item) }
+                            onDelete = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                viewModel.deleteReminder(context, item)
+                            }
                         )
                     }
                 }
@@ -115,7 +142,8 @@ fun ReminderCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
         Row(
             modifier = Modifier
@@ -123,30 +151,40 @@ fun ReminderCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Alarm, contentDescription = null, tint = GreenPrimary, modifier = Modifier.size(32.dp))
+            Surface(
+                color = WarmGold.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.size(44.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Alarm, contentDescription = null, tint = WarmGold, modifier = Modifier.size(24.dp))
+                }
+            }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = item.customer?.name ?: "Customer",
+                    text = item.customer?.name ?: "Customer Account",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "Amount: ${AccountingEngine.formatCurrency(item.reminder.amountMinor)}",
                     fontSize = 14.sp,
-                    color = Color.DarkGray
+                    fontWeight = FontWeight.SemiBold,
+                    color = DeepEmerald
                 )
                 Text(
                     text = dateStr,
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                 )
             }
 
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = RedPayable)
+                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = PayableRed)
             }
         }
     }
@@ -171,7 +209,7 @@ fun AddReminderDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Set Payment Reminder", fontWeight = FontWeight.Bold) },
+        title = { Text("Set Payment Reminder", fontWeight = FontWeight.ExtraBold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 // Customer Selector
@@ -184,8 +222,9 @@ fun AddReminderDialog(
                         value = selectedName,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Customer") },
+                        label = { Text("Customer Account") },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .menuAnchor()
@@ -196,7 +235,7 @@ fun AddReminderDialog(
                     ) {
                         customers.forEach { cust ->
                             DropdownMenuItem(
-                                text = { Text(cust.name) },
+                                text = { Text(cust.name, fontWeight = FontWeight.Bold) },
                                 onClick = {
                                     selectedCustId = cust.id
                                     expanded = false
@@ -211,6 +250,7 @@ fun AddReminderDialog(
                     onValueChange = { amountInput = it },
                     label = { Text("Amount (₹)") },
                     singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -240,22 +280,24 @@ fun AddReminderDialog(
                             calendar.get(Calendar.DAY_OF_MONTH)
                         ).show()
                     },
+                    shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Reminder Time: $dateStr", fontSize = 12.sp)
+                    Text("Reminder Date: $dateStr", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         },
         confirmButton = {
-            TextButton(
+            Button(
                 onClick = {
                     val amtMinor = AccountingEngine.parseToMinorUnits(amountInput)
                     if (selectedCustId > 0 && amtMinor > 0) {
                         onConfirm(selectedCustId, amtMinor, dateTimeMillis, notes)
                     }
-                }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = DeepEmerald)
             ) {
-                Text("Schedule", fontWeight = FontWeight.Bold, color = GreenPrimary)
+                Text("Schedule Reminder", fontWeight = FontWeight.Bold, color = Color.White)
             }
         },
         dismissButton = {

@@ -1,5 +1,6 @@
 package com.merakhata.app.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,7 +9,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -17,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +40,7 @@ fun HomeScreen(
     onNavigateToCustomer: (Long) -> Unit,
     onNavigateToAddCustomer: () -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     val dashboardSummary by viewModel.dashboardSummary.collectAsState()
     val customers by viewModel.filteredCustomers.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -51,12 +54,16 @@ fun HomeScreen(
     Scaffold(
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = onNavigateToAddCustomer,
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onNavigateToAddCustomer()
+                },
                 icon = { Icon(Icons.Default.Add, contentDescription = null, tint = Color.White) },
-                text = { Text("+ ADD CUSTOMER", fontWeight = FontWeight.Bold, color = Color.White) },
-                containerColor = GreenReceivable,
+                text = { Text("+ ADD CUSTOMER", fontWeight = FontWeight.Bold, color = Color.White, letterSpacing = 0.5.sp) },
+                containerColor = DeepEmerald,
                 contentColor = Color.White,
-                shape = RoundedCornerShape(20.dp)
+                shape = RoundedCornerShape(24.dp),
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
             )
         }
     ) { padding ->
@@ -72,7 +79,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
                     .background(PrimaryHeaderGradient)
-                    .padding(20.dp)
+                    .padding(horizontal = 20.dp, vertical = 20.dp)
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Row(
@@ -84,23 +91,24 @@ fun HomeScreen(
                             Text(
                                 text = if (businessName.isNotBlank()) businessName else "MERA KHATA",
                                 fontSize = 22.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White,
+                                letterSpacing = (-0.3).sp
                             )
                             if (ownerName.isNotBlank()) {
                                 Text(
                                     text = "Owner: $ownerName",
-                                    fontSize = 12.sp,
+                                    fontSize = 13.sp,
                                     color = Color.White.copy(alpha = 0.85f)
                                 )
                             }
                         }
                         Surface(
                             color = Color.White.copy(alpha = 0.2f),
-                            shape = RoundedCornerShape(14.dp)
+                            shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                text = "v1.0.0",
+                                text = "v1.0.5",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
@@ -115,8 +123,9 @@ fun HomeScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                        shape = RoundedCornerShape(20.dp)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                     ) {
                         Column(
                             modifier = Modifier
@@ -131,15 +140,15 @@ fun HomeScreen(
                                     Text(
                                         text = "You Will Receive",
                                         fontSize = 12.sp,
-                                        color = Color.Gray,
-                                        fontWeight = FontWeight.Medium
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        fontWeight = FontWeight.SemiBold
                                     )
-                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Spacer(modifier = Modifier.height(3.dp))
                                     Text(
                                         text = AccountingEngine.formatCurrency(dashboardSummary.totalReceivableMinor),
-                                        fontSize = 19.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = GreenReceivable
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = ReceivableGreen
                                     )
                                 }
 
@@ -147,31 +156,29 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .height(44.dp)
                                         .padding(horizontal = 12.dp),
-                                    color = Color.LightGray.copy(alpha = 0.6f)
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                                 )
 
-                                Column(
-                                    modifier = Modifier.weight(1f)
-                                ) {
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "You Will Pay",
                                         fontSize = 12.sp,
-                                        color = Color.Gray,
-                                        fontWeight = FontWeight.Medium
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                        fontWeight = FontWeight.SemiBold
                                     )
-                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Spacer(modifier = Modifier.height(3.dp))
                                     Text(
                                         text = AccountingEngine.formatCurrency(dashboardSummary.totalPayableMinor),
-                                        fontSize = 19.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = RedPayable
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = PayableRed
                                     )
                                 }
                             }
 
                             HorizontalDivider(
                                 modifier = Modifier.padding(vertical = 14.dp),
-                                color = Color.LightGray.copy(alpha = 0.4f)
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
                             )
 
                             Row(
@@ -180,14 +187,14 @@ fun HomeScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Net Balance",
+                                    text = "Net Ledger Balance",
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
+                                    fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 val netColor = when {
-                                    dashboardSummary.netBalanceMinor > 0 -> GreenReceivable
-                                    dashboardSummary.netBalanceMinor < 0 -> RedPayable
+                                    dashboardSummary.netBalanceMinor > 0 -> ReceivableGreen
+                                    dashboardSummary.netBalanceMinor < 0 -> PayableRed
                                     else -> SettledGray
                                 }
                                 Surface(
@@ -197,9 +204,9 @@ fun HomeScreen(
                                     Text(
                                         text = AccountingEngine.formatCurrency(dashboardSummary.netBalanceMinor),
                                         fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.ExtraBold,
                                         color = netColor,
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
                                     )
                                 }
                             }
@@ -208,7 +215,7 @@ fun HomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Search Bar & Sort Button
             Row(
@@ -221,7 +228,7 @@ fun HomeScreen(
                     value = searchQuery,
                     onValueChange = { viewModel.onSearchQueryChange(it) },
                     placeholder = { Text("Search customer by name or phone...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = GreenPrimary) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = DeepEmerald) },
                     trailingIcon = {
                         if (searchQuery.isNotEmpty()) {
                             IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
@@ -232,8 +239,8 @@ fun HomeScreen(
                     singleLine = true,
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = GreenPrimary,
-                        unfocusedBorderColor = CardBorderLight
+                        focusedBorderColor = DeepEmerald,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
                     ),
                     modifier = Modifier.weight(1f)
                 )
@@ -241,12 +248,15 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 IconButton(
-                    onClick = { showSortMenu = true },
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        showSortMenu = true
+                    },
                     modifier = Modifier
                         .size(52.dp)
                         .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort", tint = GreenPrimary)
+                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort", tint = DeepEmerald)
                 }
 
                 DropdownMenu(
@@ -277,7 +287,7 @@ fun HomeScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 CustomerFilter.values().forEach { filter ->
@@ -290,11 +300,14 @@ fun HomeScreen(
                     }
                     FilterChip(
                         selected = isSelected,
-                        onClick = { viewModel.onFilterSelect(filter) },
-                        label = { Text(label, fontSize = 12.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            viewModel.onFilterSelect(filter)
+                        },
+                        label = { Text(label, fontSize = 12.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium) },
                         shape = RoundedCornerShape(14.dp),
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = GreenPrimary,
+                            selectedContainerColor = DeepEmerald,
                             selectedLabelColor = Color.White
                         )
                     )
@@ -309,11 +322,21 @@ fun HomeScreen(
                         .padding(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = if (searchQuery.isNotEmpty()) "No customer matches search." else "No customer accounts yet.\nTap '+ ADD CUSTOMER' to get started.",
-                        color = Color.Gray,
-                        fontSize = 14.sp
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.PeopleOutline,
+                            contentDescription = null,
+                            tint = DeepEmerald.copy(alpha = 0.5f),
+                            modifier = Modifier.size(56.dp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = if (searchQuery.isNotEmpty()) "No customer matches your search." else "No customer accounts yet.\nTap '+ ADD CUSTOMER' to get started.",
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             } else {
                 LazyColumn(
@@ -325,7 +348,10 @@ fun HomeScreen(
                     items(customers, key = { it.customer.id }) { item ->
                         CustomerCard(
                             summary = item,
-                            onClick = { onNavigateToCustomer(item.customer.id) }
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onNavigateToCustomer(item.customer.id)
+                            }
                         )
                     }
                 }
@@ -344,8 +370,9 @@ fun CustomerCard(
             .fillMaxWidth()
             .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-        shape = RoundedCornerShape(16.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
     ) {
         Row(
             modifier = Modifier
@@ -379,11 +406,11 @@ fun CustomerCard(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                if (!summary.customer.phone.isNull_or_blank()) {
+                if (!summary.customer.phone.isNullOrEmpty()) {
                     Text(
-                        text = summary.customer.phone!!,
+                        text = summary.customer.phone,
                         fontSize = 12.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
                 if (summary.lastTransactionDate != null) {
@@ -391,7 +418,7 @@ fun CustomerCard(
                     Text(
                         text = "Last: $dateStr",
                         fontSize = 11.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
                 }
             }
@@ -399,8 +426,8 @@ fun CustomerCard(
             // Balance Column with Pill Badge
             Column(horizontalAlignment = Alignment.End) {
                 val (amtColor, labelText) = when (summary.status) {
-                    LedgerStatus.YOU_WILL_RECEIVE -> Pair(GreenReceivable, "You Receive")
-                    LedgerStatus.YOU_WILL_PAY -> Pair(RedPayable, "You Pay")
+                    LedgerStatus.YOU_WILL_RECEIVE -> Pair(ReceivableGreen, "You Receive")
+                    LedgerStatus.YOU_WILL_PAY -> Pair(PayableRed, "You Pay")
                     LedgerStatus.SETTLED -> Pair(SettledGray, "Settled")
                 }
 
@@ -431,5 +458,3 @@ fun CustomerCard(
         }
     }
 }
-
-private fun String?.isNull_or_blank(): Boolean = this == null || this.trim().isEmpty()

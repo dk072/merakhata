@@ -1,14 +1,22 @@
 package com.merakhata.app.ui.navigation
 
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -19,7 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.merakhata.app.MeraKhataApp
 import com.merakhata.app.ui.screens.*
-import com.merakhata.app.ui.theme.GreenPrimary
+import com.merakhata.app.ui.theme.EmeraldPrimary
 import com.merakhata.app.ui.viewmodels.*
 
 sealed class BottomNavItem(val route: String, val title: String, val icon: ImageVector) {
@@ -32,6 +40,7 @@ sealed class BottomNavItem(val route: String, val title: String, val icon: Image
 @Composable
 fun AppNavigation(navController: NavHostController = rememberNavController()) {
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
     val app = context.applicationContext as MeraKhataApp
     val repository = app.repository
 
@@ -63,33 +72,47 @@ fun AppNavigation(navController: NavHostController = rememberNavController()) {
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
+                Surface(
+                    tonalElevation = 8.dp,
+                    shadowElevation = 10.dp,
+                    color = MaterialTheme.colorScheme.surface
                 ) {
-                    bottomNavItems.forEach { item ->
-                        val isSelected = currentRoute == item.route
-                        NavigationBarItem(
-                            selected = isSelected,
-                            onClick = {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                    NavigationBar(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.height(72.dp)
+                    ) {
+                        bottomNavItems.forEach { item ->
+                            val isSelected = currentRoute == item.route
+                            NavigationBarItem(
+                                selected = isSelected,
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    navController.navigate(item.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = { Icon(item.icon, contentDescription = item.title) },
-                            label = { Text(item.title) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                                },
+                                icon = { Icon(item.icon, contentDescription = item.title) },
+                                label = {
+                                    Text(
+                                        text = item.title,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                        fontSize = 12.sp
+                                    )
+                                },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                                    unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                    unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                    indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }

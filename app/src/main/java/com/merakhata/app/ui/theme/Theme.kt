@@ -13,29 +13,31 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = NeonMint,
-    secondary = SecondaryAccent,
-    tertiary = ElectricEmerald,
+    primary = ElectricEmerald,
+    secondary = InfoBlue,
+    tertiary = WarmGold,
     background = BackgroundDark,
     surface = SurfaceDark,
     onPrimary = Color(0xFF064E3B),
     onSecondary = Color.White,
     onBackground = Color(0xFFF8FAFC),
     onSurface = Color(0xFFF8FAFC),
-    outline = Color(0xFF475569)
+    outline = CardBorderDark,
+    surfaceVariant = Color(0xFF263353)
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = DeepEmerald,
-    secondary = ElectricEmerald,
-    tertiary = SecondaryAccent,
+    secondary = EmeraldPrimary,
+    tertiary = WarmGold,
     background = BackgroundLight,
     surface = SurfaceLight,
     onPrimary = Color.White,
     onSecondary = Color.White,
-    onBackground = Color(0xFF0F172A),
-    onSurface = Color(0xFF0F172A),
-    outline = Color(0xFFCBD5E1)
+    onBackground = DeepCharcoal,
+    onSurface = DeepCharcoal,
+    outline = CardBorderLight,
+    surfaceVariant = Color(0xFFF1F5F9)
 )
 
 @Composable
@@ -53,7 +55,8 @@ fun MeraKhataTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = HeaderGradientStart.toArgb()
+            val statusBarColor = if (darkTheme) BackgroundDark else HeaderGradientStart
+            window.statusBarColor = statusBarColor.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
         }
     }

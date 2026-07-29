@@ -1,5 +1,6 @@
 package com.merakhata.app.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,27 +11,27 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.merakhata.app.domain.accounting.AccountingEngine
-import com.merakhata.app.ui.theme.GreenPrimary
-import com.merakhata.app.ui.theme.GreenReceivable
-import com.merakhata.app.ui.theme.HeaderGradientStart
-import com.merakhata.app.ui.theme.RedPayable
+import com.merakhata.app.ui.theme.*
 import com.merakhata.app.ui.viewmodels.ReportPeriod
 import com.merakhata.app.ui.viewmodels.ReportsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportsScreen(viewModel: ReportsViewModel) {
+    val haptic = LocalHapticFeedback.current
     val selectedPeriod by viewModel.selectedPeriod.collectAsState()
     val reportSummary by viewModel.reportSummary.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Business Reports", fontWeight = FontWeight.Bold) },
+                title = { Text("Business Analytics & Reports", fontWeight = FontWeight.ExtraBold, color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = HeaderGradientStart,
                     titleContentColor = Color.White
@@ -44,7 +45,7 @@ fun ReportsScreen(viewModel: ReportsViewModel) {
                 .padding(padding)
                 .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(20.dp)
         ) {
             // Period Filter Chips
             Row(
@@ -57,58 +58,61 @@ fun ReportsScreen(viewModel: ReportsViewModel) {
                         ReportPeriod.TODAY -> "Today"
                         ReportPeriod.LAST_7_DAYS -> "Last 7 Days"
                         ReportPeriod.THIS_MONTH -> "This Month"
-                        ReportPeriod.CUSTOM -> "Custom"
+                        ReportPeriod.CUSTOM -> "All Time"
                     }
                     FilterChip(
                         selected = isSelected,
-                        onClick = { viewModel.onPeriodSelect(period) },
-                        label = { Text(label, fontSize = 12.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal) },
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            viewModel.onPeriodSelect(period)
+                        },
+                        label = { Text(label, fontSize = 12.sp, fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium) },
                         shape = RoundedCornerShape(14.dp),
                         colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = GreenPrimary,
+                            selectedContainerColor = DeepEmerald,
                             selectedLabelColor = Color.White
                         )
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
-            // Report Summary Cards
+            // Report Summary Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                shape = RoundedCornerShape(18.dp)
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.25f))
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
                 ) {
-                    Text("Period Ledger Summary", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = GreenPrimary)
+                    Text("Period Ledger Summary", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = DeepEmerald)
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
                     ReportMetricRow(
                         label = "Total Credit Given (YOU GAVE)",
                         amountStr = AccountingEngine.formatCurrency(reportSummary.totalCreditGivenMinor),
-                        color = RedPayable
+                        color = PayableRed
                     )
 
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = Color.LightGray.copy(alpha = 0.5f))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
 
                     ReportMetricRow(
                         label = "Total Payment Received (YOU GOT)",
                         amountStr = AccountingEngine.formatCurrency(reportSummary.totalPaymentReceivedMinor),
-                        color = GreenReceivable
+                        color = ReceivableGreen
                     )
 
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = Color.LightGray.copy(alpha = 0.5f))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
 
                     ReportMetricRow(
                         label = "Total Transactions Recorded",
-                        amountStr = "${reportSummary.totalTransactionsCount}",
+                        amountStr = "${reportSummary.totalTransactionsCount} entries",
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -128,7 +132,7 @@ fun ReportMetricRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, fontSize = 13.sp, color = Color.Gray)
-        Text(amountStr, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = color)
+        Text(label, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontWeight = FontWeight.Medium)
+        Text(amountStr, fontSize = 17.sp, fontWeight = FontWeight.ExtraBold, color = color)
     }
 }
