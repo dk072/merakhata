@@ -1,7 +1,7 @@
 {
-    "versionCode":  11,
-    "versionName":  "1.0.10",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.10.apk",
-    "releaseNotes":  "?? 100% Mobile Responsiveness Fix! Horizontal scrollable filter chips, aligned TopAppBar, and perfectly proportioned buttons across all screen resolutions.",
+    "versionCode":  12,
+    "versionName":  "1.0.11",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.11.apk",
+    "releaseNotes":  "?? 100% Mobile Responsiveness Fix! Horizontal scrollable filter chips, aligned TopAppBar, and responsive buttons.",
     "isMandatory":  false
 }
