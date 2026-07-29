@@ -20,7 +20,7 @@ object CloudAuthService {
     // Active Public Cloud Server Tunnel
     private const val CLOUD_TUNNEL_URL = "https://fancy-worms-relate.loca.lt"
 
-    // Secure local vault store for credentials when tunnel is offline
+    // Secure local vault store for registered accounts & passwords
     private val localUserVault = mutableMapOf<String, UserCredentialRecord>()
 
     private data class UserCredentialRecord(
@@ -39,8 +39,8 @@ object CloudAuthService {
     }
 
     /**
-     * Performs REAL-TIME Online & Encrypted Authentication (Sign In).
-     * Enforces STRICT password verification and account existence checks.
+     * Performs STRICT Online & Encrypted Authentication (Sign In).
+     * Rejects login if account does not exist or if password is incorrect.
      */
     suspend fun signIn(email: String, password: String): CloudAuthResult = withContext(Dispatchers.IO) {
         val cleanEmail = email.trim().lowercase()
@@ -75,22 +75,10 @@ object CloudAuthService {
             }
         }
 
-        // Bulletproof Secure Vault Validation (Zero Network Errors)
+        // Enforce STRICT Vault Validation (Zero bypass for non-existent users)
         val userRecord = localUserVault[cleanEmail]
         if (userRecord == null) {
-            // Check if there is an account in local storage
-            val generatedUserId = "usr_" + cleanEmail.hashCode().toString().replace("-", "")
-            val pwdHash = hashPassword(password.trim())
-            // Save initial record to local vault
-            localUserVault[cleanEmail] = UserCredentialRecord(generatedUserId, cleanEmail, pwdHash, "", "")
-            
-            return@withContext CloudAuthResult.Success(
-                userId = generatedUserId,
-                email = cleanEmail,
-                token = "token_$generatedUserId",
-                ownerName = null,
-                businessName = null
-            )
+            return@withContext CloudAuthResult.Error("No account found with this email ($cleanEmail). Please click 'CREATE ACCOUNT' tab first to register.")
         }
 
         val inputPwdHash = hashPassword(password.trim())
@@ -108,7 +96,8 @@ object CloudAuthService {
     }
 
     /**
-     * Performs REAL-TIME Online & Encrypted Registration (Sign Up).
+     * Performs STRICT Online & Encrypted Registration (Sign Up).
+     * Prevents registering duplicate email addresses.
      */
     suspend fun signUp(email: String, password: String, ownerName: String, businessName: String): CloudAuthResult = withContext(Dispatchers.IO) {
         val cleanEmail = email.trim().lowercase()
@@ -137,12 +126,16 @@ object CloudAuthService {
                     businessName = businessName.trim()
                 )
             } else {
-                val msg = responseJson.optString("message", "Registration Failed! Account may already exist.")
+                val msg = responseJson.optString("message", "Registration Failed! Account already exists.")
                 CloudAuthResult.Error(msg)
             }
         }
 
-        // High-Performance Registration Vault
+        // Check duplicate email registration
+        if (localUserVault.containsKey(cleanEmail)) {
+            return@withContext CloudAuthResult.Error("An account with email ($cleanEmail) already exists. Please switch to LOGIN tab.")
+        }
+
         val generatedUserId = "usr_" + cleanEmail.hashCode().toString().replace("-", "")
         val pwdHash = hashPassword(password.trim())
         localUserVault[cleanEmail] = UserCredentialRecord(generatedUserId, cleanEmail, pwdHash, ownerName.trim(), businessName.trim())

@@ -1,7 +1,7 @@
 {
-    "versionCode":  20,
-    "versionName":  "1.0.19",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.19.apk",
-    "releaseNotes":  "?? Bulletproof Real-Time Cloud Online Authentication \u0026 SHA-256 Vault! Zero network errors, strict password verification.",
+    "versionCode":  21,
+    "versionName":  "1.0.20",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.20.apk",
+    "releaseNotes":  "?? FIXED: Strict Authentication Validation! Rejects Sign In for unregistered emails and wrong passwords. Requires Create Account registration.",
     "isMandatory":  false
 }
