@@ -57,7 +57,12 @@ class UserPreferencesRepository(private val context: Context) {
     }
 
     val updateUrl: Flow<String> = context.dataStore.data.map { preferences ->
-        preferences[KEY_UPDATE_URL] ?: "https://raw.githubusercontent.com/dk072/merakhata/main/update.json"
+        val saved = preferences[KEY_UPDATE_URL]
+        if (saved.isNullOrEmpty() || saved.contains("loca.lt") || saved.contains("merakhata/app")) {
+            "https://raw.githubusercontent.com/dk072/merakhata/main/update.json"
+        } else {
+            saved
+        }
     }
 
     val autoCheckUpdates: Flow<Boolean> = context.dataStore.data.map { preferences ->
