@@ -42,16 +42,16 @@ Set-Content -Path $gradleFile -Value $gradleContent
 Write-Host "Building APK..." -ForegroundColor Cyan
 & .\gradlew.bat assembleDebug
 
-$builtApk = Join-Path $PSScriptRoot "app\build\outputs\apk\debug\app-debug.apk"
-if (-not (Test-Path $builtApk)) {
-    Write-Host "Build failed: APK not found at $builtApk" -ForegroundColor Red
+$builtApk = Get-ChildItem (Join-Path $PSScriptRoot "app\build\outputs\apk\debug") -Filter "*.apk" | Select-Object -First 1
+if (-not $builtApk) {
+    Write-Host "Build failed: APK file not found in build directory" -ForegroundColor Red
     exit 1
 }
 
 # 5. Copy APK to root for distribution
 $targetApkName = "MeraKhata_v${newName}.apk"
 $targetApkPath = Join-Path $PSScriptRoot $targetApkName
-Copy-Item -Path $builtApk -Destination $targetApkPath -Force
+Copy-Item -Path $builtApk.FullName -Destination $targetApkPath -Force
 Write-Host "APK created: $targetApkName" -ForegroundColor Green
 
 # 6. Update update.json
