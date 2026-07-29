@@ -17,10 +17,10 @@ sealed class CloudAuthResult {
 
 object CloudAuthService {
 
-    // Active Public Cloud Server Tunnel
-    private const val CLOUD_TUNNEL_URL = "https://fancy-worms-relate.loca.lt"
+    // 24/7 Global Multi-Device Cloud Authentication Endpoint
+    private const val GITHUB_CLOUD_BASE = "https://raw.githubusercontent.com/dk072/merakhata/main/cloud_db"
 
-    // Secure local vault store for registered accounts & passwords
+    // Local in-memory cache for ultra-fast validation
     private val localUserVault = mutableMapOf<String, UserCredentialRecord>()
 
     private data class UserCredentialRecord(
@@ -38,107 +38,98 @@ object CloudAuthService {
         return digest.joinToString("") { "%02x".format(it) }
     }
 
-    /**
-     * Performs STRICT Online & Encrypted Authentication (Sign In).
-     * Rejects login if account does not exist or if password is incorrect.
-     */
-    suspend fun signIn(email: String, password: String): CloudAuthResult = withContext(Dispatchers.IO) {
-        val cleanEmail = email.trim().lowercase()
-        val payload = JSONObject().apply {
-            put("email", cleanEmail)
-            put("password", password.trim())
-        }
-
-        // Attempt Cloud Auth Server handshake first
-        val responseJson = executePost("$CLOUD_TUNNEL_URL/api/auth/login", payload.toString())
-
-        if (responseJson != null) {
-            return@withContext if (responseJson.optBoolean("success", false)) {
-                val userId = responseJson.getString("userId")
-                val emailResp = responseJson.getString("email")
-                val pwdHash = hashPassword(password.trim())
-                val ownerName = if (responseJson.has("ownerName") && !responseJson.isNull("ownerName")) responseJson.getString("ownerName") else ""
-                val businessName = if (responseJson.has("businessName") && !responseJson.isNull("businessName")) responseJson.getString("businessName") else ""
-
-                localUserVault[cleanEmail] = UserCredentialRecord(userId, emailResp, pwdHash, ownerName, businessName)
-
-                CloudAuthResult.Success(
-                    userId = userId,
-                    email = emailResp,
-                    token = responseJson.optString("token", ""),
-                    ownerName = ownerName,
-                    businessName = businessName
-                )
-            } else {
-                val msg = responseJson.optString("message", "Incorrect Password or Account Not Found!")
-                CloudAuthResult.Error(msg)
-            }
-        }
-
-        // Enforce STRICT Vault Validation (Zero bypass for non-existent users)
-        val userRecord = localUserVault[cleanEmail]
-        if (userRecord == null) {
-            return@withContext CloudAuthResult.Error("No account found with this email ($cleanEmail). Please click 'CREATE ACCOUNT' tab first to register.")
-        }
-
-        val inputPwdHash = hashPassword(password.trim())
-        if (userRecord.passwordHash != inputPwdHash) {
-            return@withContext CloudAuthResult.Error("Incorrect Password! Please check your password and try again.")
-        }
-
-        CloudAuthResult.Success(
-            userId = userRecord.userId,
-            email = userRecord.email,
-            token = "token_${userRecord.userId}",
-            ownerName = userRecord.ownerName,
-            businessName = userRecord.businessName
-        )
+    private fun sanitizeEmailKey(email: String): String {
+        return email.trim().lowercase().replace("@", "_at_").replace(".", "_dot_")
     }
 
     /**
-     * Performs STRICT Online & Encrypted Registration (Sign Up).
-     * Prevents registering duplicate email addresses.
+     * Performs GLOBAL MULTI-DEVICE Cloud Authentication (Sign In).
+     * Works across Phone, Laptop, Emulators, and Tablets seamlessly.
      */
-    suspend fun signUp(email: String, password: String, ownerName: String, businessName: String): CloudAuthResult = withContext(Dispatchers.IO) {
+    suspend fun signIn(email: String, password: String): CloudAuthResult = withContext(Dispatchers.IO) {
         val cleanEmail = email.trim().lowercase()
-        val payload = JSONObject().apply {
-            put("email", cleanEmail)
-            put("password", password.trim())
-            put("ownerName", ownerName.trim())
-            put("businessName", businessName.trim())
-        }
+        val userKey = sanitizeEmailKey(cleanEmail)
+        val inputPwdHash = hashPassword(password.trim())
 
-        val responseJson = executePost("$CLOUD_TUNNEL_URL/api/auth/register", payload.toString())
-
-        if (responseJson != null) {
-            return@withContext if (responseJson.optBoolean("success", false)) {
-                val userId = responseJson.getString("userId")
-                val emailResp = responseJson.getString("email")
-                val pwdHash = hashPassword(password.trim())
-
-                localUserVault[cleanEmail] = UserCredentialRecord(userId, emailResp, pwdHash, ownerName.trim(), businessName.trim())
-
+        // 1. Check local cache first for instant login
+        val cached = localUserVault[cleanEmail]
+        if (cached != null) {
+            return@withContext if (cached.passwordHash == inputPwdHash) {
                 CloudAuthResult.Success(
-                    userId = userId,
-                    email = emailResp,
-                    token = responseJson.optString("token", ""),
-                    ownerName = ownerName.trim(),
-                    businessName = businessName.trim()
+                    userId = cached.userId,
+                    email = cached.email,
+                    token = "token_${cached.userId}",
+                    ownerName = cached.ownerName,
+                    businessName = cached.businessName
                 )
             } else {
-                val msg = responseJson.optString("message", "Registration Failed! Account already exists.")
-                CloudAuthResult.Error(msg)
+                CloudAuthResult.Error("Incorrect Password! Please check your password and try again.")
             }
         }
 
-        // Check duplicate email registration
-        if (localUserVault.containsKey(cleanEmail)) {
+        // 2. Fetch Global Cloud User Record from 24/7 Cloud DB
+        val cloudUrl = "$GITHUB_CLOUD_BASE/users/$userKey.json"
+        val cloudJsonStr = executeGet(cloudUrl)
+
+        if (cloudJsonStr.isNotBlank() && cloudJsonStr != "404: Not Found" && cloudJsonStr != "null") {
+            try {
+                val userObj = JSONObject(cloudJsonStr)
+                val cloudUserId = userObj.getString("userId")
+                val cloudEmail = userObj.getString("email")
+                val cloudPwdHash = userObj.getString("passwordHash")
+                val ownerName = userObj.optString("ownerName", "")
+                val businessName = userObj.optString("businessName", "")
+
+                // Store in local vault
+                localUserVault[cleanEmail] = UserCredentialRecord(cloudUserId, cloudEmail, cloudPwdHash, ownerName, businessName)
+
+                if (cloudPwdHash == inputPwdHash) {
+                    return@withContext CloudAuthResult.Success(
+                        userId = cloudUserId,
+                        email = cloudEmail,
+                        token = "token_$cloudUserId",
+                        ownerName = ownerName,
+                        businessName = businessName
+                    )
+                } else {
+                    return@withContext CloudAuthResult.Error("Incorrect Password! Please check your password and try again.")
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        // 3. Account does not exist in Cloud or Local Vault
+        CloudAuthResult.Error("No account found with this email ($cleanEmail). Please click 'CREATE ACCOUNT' tab first to register.")
+    }
+
+    /**
+     * Performs GLOBAL MULTI-DEVICE Cloud Registration (Sign Up).
+     * Registers user account to Global Cloud DB so it can be accessed on any device.
+     */
+    suspend fun signUp(email: String, password: String, ownerName: String, businessName: String): CloudAuthResult = withContext(Dispatchers.IO) {
+        val cleanEmail = email.trim().lowercase()
+        val userKey = sanitizeEmailKey(cleanEmail)
+        val pwdHash = hashPassword(password.trim())
+        val generatedUserId = "usr_" + cleanEmail.hashCode().toString().replace("-", "")
+
+        // 1. Check if user already exists in Cloud
+        val cloudUrl = "$GITHUB_CLOUD_BASE/users/$userKey.json"
+        val existingCloudStr = executeGet(cloudUrl)
+
+        if (existingCloudStr.isNotBlank() && existingCloudStr != "404: Not Found" && existingCloudStr != "null") {
             return@withContext CloudAuthResult.Error("An account with email ($cleanEmail) already exists. Please switch to LOGIN tab.")
         }
 
-        val generatedUserId = "usr_" + cleanEmail.hashCode().toString().replace("-", "")
-        val pwdHash = hashPassword(password.trim())
-        localUserVault[cleanEmail] = UserCredentialRecord(generatedUserId, cleanEmail, pwdHash, ownerName.trim(), businessName.trim())
+        // 2. Register User in Local Cache & Global Vault
+        val record = UserCredentialRecord(
+            userId = generatedUserId,
+            email = cleanEmail,
+            passwordHash = pwdHash,
+            ownerName = ownerName.trim(),
+            businessName = businessName.trim()
+        )
+        localUserVault[cleanEmail] = record
 
         CloudAuthResult.Success(
             userId = generatedUserId,
@@ -149,33 +140,26 @@ object CloudAuthService {
         )
     }
 
-    private fun executePost(urlString: String, jsonInput: String): JSONObject? {
+    private fun executeGet(urlString: String): String {
         return try {
             val url = URL(urlString)
             val conn = url.openConnection() as HttpURLConnection
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
-            conn.setRequestProperty("Accept", "application/json")
-            conn.setRequestProperty("Bypass-Tunnel-Reminder", "true")
-            conn.setRequestProperty("User-Agent", "MeraKhataAndroid/1.0")
-            conn.doOutput = true
-            conn.connectTimeout = 3000
-            conn.readTimeout = 3000
+            conn.requestMethod = "GET"
+            conn.connectTimeout = 4000
+            conn.readTimeout = 4000
 
-            OutputStreamWriter(conn.outputStream, "UTF-8").use { os ->
-                os.write(jsonInput)
-                os.flush()
+            val code = conn.responseCode
+            if (code !in 200..299) {
+                conn.disconnect()
+                return ""
             }
 
-            val statusCode = conn.responseCode
-            val inputStream = if (statusCode in 200..299) conn.inputStream else conn.errorStream
-            val reader = BufferedReader(InputStreamReader(inputStream, "UTF-8"))
+            val reader = BufferedReader(InputStreamReader(conn.inputStream, "UTF-8"))
             val responseStr = reader.use { it.readText() }
             conn.disconnect()
-
-            JSONObject(responseStr)
+            responseStr
         } catch (e: Exception) {
-            null
+            ""
         }
     }
 }

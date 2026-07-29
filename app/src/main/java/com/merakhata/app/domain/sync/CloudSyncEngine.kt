@@ -16,6 +16,7 @@ import java.net.URL
 
 object CloudSyncEngine {
 
+    private const val GITHUB_CLOUD_BASE = "https://raw.githubusercontent.com/dk072/merakhata/main/cloud_db"
     private const val CLOUD_TUNNEL_URL = "https://fancy-worms-relate.loca.lt"
 
     /**
@@ -42,20 +43,29 @@ object CloudSyncEngine {
     }
 
     /**
-     * Fetches cloud database state from Cloud for userId and restores it to local Room DB.
+     * Fetches cloud database state from 24/7 Global Cloud DB for userId and restores it to local Room DB.
      */
     suspend fun fetchCloudDataAndRestore(repository: KhataRepository, userId: String): Boolean = withContext(Dispatchers.IO) {
         try {
-            val bodyObj = JSONObject().apply {
-                put("userId", userId)
-            }
-            val responseJson = executePost("$CLOUD_TUNNEL_URL/api/sync/pull", bodyObj.toString()) ?: return@withContext false
+            var cloudJsonStr = ""
 
-            if (!responseJson.optBoolean("success", false) || !responseJson.has("backupJson")) {
+            // 1. Try localtunnel sync API
+            val bodyObj = JSONObject().apply { put("userId", userId) }
+            val responseJson = executePost("$CLOUD_TUNNEL_URL/api/sync/pull", bodyObj.toString())
+            if (responseJson != null && responseJson.optBoolean("success", false) && responseJson.has("backupJson")) {
+                cloudJsonStr = responseJson.optString("backupJson", "")
+            }
+
+            // 2. Try 24/7 Global Cloud Repository Fallback
+            if (cloudJsonStr.isBlank()) {
+                val cloudUrl = "$GITHUB_CLOUD_BASE/ledgers/$userId.json"
+                cloudJsonStr = executeGet(cloudUrl)
+            }
+
+            if (cloudJsonStr.isBlank() || cloudJsonStr == "404: Not Found" || cloudJsonStr == "null") {
                 return@withContext false
             }
 
-            val cloudJsonStr = responseJson.optString("backupJson", null) ?: return@withContext false
             val validation = BackupManager.validateBackupJson(cloudJsonStr)
             if (validation.isValid) {
                 val backupObj = JSONObject(cloudJsonStr)
@@ -125,8 +135,8 @@ object CloudSyncEngine {
             conn.setRequestProperty("Bypass-Tunnel-Reminder", "true")
             conn.setRequestProperty("User-Agent", "MeraKhataAndroid/1.0")
             conn.doOutput = true
-            conn.connectTimeout = 4000
-            conn.readTimeout = 4000
+            conn.connectTimeout = 3000
+            conn.readTimeout = 3000
 
             OutputStreamWriter(conn.outputStream, "UTF-8").use { os ->
                 os.write(jsonInput)
@@ -142,6 +152,29 @@ object CloudSyncEngine {
             JSONObject(responseStr)
         } catch (e: Exception) {
             null
+        }
+    }
+
+    private fun executeGet(urlString: String): String {
+        return try {
+            val url = URL(urlString)
+            val conn = url.openConnection() as HttpURLConnection
+            conn.requestMethod = "GET"
+            conn.connectTimeout = 4000
+            conn.readTimeout = 4000
+
+            val code = conn.responseCode
+            if (code !in 200..299) {
+                conn.disconnect()
+                return ""
+            }
+
+            val reader = BufferedReader(InputStreamReader(conn.inputStream, "UTF-8"))
+            val responseStr = reader.use { it.readText() }
+            conn.disconnect()
+            responseStr
+        } catch (e: Exception) {
+            ""
         }
     }
 }

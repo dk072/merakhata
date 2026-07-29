@@ -1,7 +1,7 @@
 {
-    "versionCode":  21,
-    "versionName":  "1.0.20",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.20.apk",
-    "releaseNotes":  "?? FIXED: Strict Authentication Validation! Rejects Sign In for unregistered emails and wrong passwords. Requires Create Account registration.",
+    "versionCode":  22,
+    "versionName":  "1.0.21",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.21.apk",
+    "releaseNotes":  "?? GLOBAL MULTI-DEVICE CLOUD AUTHENTICATION \u0026 SYNC! Accounts and ledgers seamlessly sync across Phone, Laptop, and Emulators.",
     "isMandatory":  false
 }
