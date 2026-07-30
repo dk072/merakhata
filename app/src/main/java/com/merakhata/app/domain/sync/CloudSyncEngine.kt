@@ -16,7 +16,7 @@ import java.net.URL
 
 object CloudSyncEngine {
 
-    private const val RENDER_CLOUD_URL = "https://merakhata-backend.onrender.com"
+    private const val RENDER_CLOUD_URL = "https://merakhata-backend-nsl2.onrender.com"
     private const val GITHUB_CLOUD_BASE = "https://raw.githubusercontent.com/dk072/merakhata/main/cloud_db"
     private const val CLOUD_TUNNEL_URL = "https://fancy-worms-relate.loca.lt"
 

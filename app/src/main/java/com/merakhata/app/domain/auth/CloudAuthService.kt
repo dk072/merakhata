@@ -26,7 +26,7 @@ sealed class CloudAuthResult {
 object CloudAuthService {
 
     // Backend Endpoints (Render Production + Local/Tunnel Development)
-    private const val RENDER_BASE_URL = "https://merakhata-backend.onrender.com"
+    private const val RENDER_BASE_URL = "https://merakhata-backend-nsl2.onrender.com"
     private const val SERVER_BASE_URL = "http://10.0.2.2:8080"
     private const val TUNNEL_BASE_URL = "https://fancy-worms-relate.loca.lt"
 

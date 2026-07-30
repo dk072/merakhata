@@ -1,7 +1,7 @@
 {
-    "versionCode":  25,
-    "versionName":  "1.0.24",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.24.apk",
-    "releaseNotes":  "?? Switched Authentication \u0026 Cloud Sync to Render Web Service Backend (Firebase Removed)",
+    "versionCode":  26,
+    "versionName":  "1.0.25",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.25.apk",
+    "releaseNotes":  "?? Connected to Live Render Backend Service (https://merakhata-backend-nsl2.onrender.com)",
     "isMandatory":  false
 }
