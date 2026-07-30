@@ -1,7 +1,7 @@
 {
-    "versionCode":  28,
-    "versionName":  "1.0.27",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.27.apk",
-    "releaseNotes":  "??? Deletion Multi-Device Sync Fix: Deleting customers/transactions syncs across all devices",
+    "versionCode":  29,
+    "versionName":  "1.0.28",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.28.apk",
+    "releaseNotes":  "? 100% Automatic Real-Time Cloud Sync: Completely automatic background cloud backup and instant multi-device restore (no manual button required)",
     "isMandatory":  false
 }

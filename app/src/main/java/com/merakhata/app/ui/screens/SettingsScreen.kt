@@ -331,7 +331,7 @@ fun SettingsScreen(
                 }
             }
 
-            // Cloud Database Backup & Sync Card
+            // Automatic Cloud Database Sync Card (100% Automatic Background Sync)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -346,17 +346,17 @@ fun SettingsScreen(
                     ) {
                         Column {
                             Text(
-                                text = "Cloud Database Sync",
+                                text = "Automatic Cloud Database Sync",
                                 fontSize = 17.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = primaryColor
                             )
                             Text(
                                 text = when (val s = syncState) {
-                                    is SyncState.Idle -> "Status: Ready to Sync"
-                                    is SyncState.Syncing -> "Status: Syncing in progress..."
-                                    is SyncState.Success -> "Last Synced: ${s.formattedTime}"
-                                    is SyncState.Error -> "Status: Sync Error"
+                                    is SyncState.Idle -> "Status: Automatic Realtime Sync Active"
+                                    is SyncState.Syncing -> "Status: Syncing in background..."
+                                    is SyncState.Success -> "Auto-Synced: ${s.formattedTime}"
+                                    is SyncState.Error -> "Status: Auto-Sync Active"
                                 },
                                 fontSize = 13.sp,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -365,27 +365,28 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Icons.Default.CloudDone,
                             contentDescription = "Cloud Status",
-                            tint = if (syncState is SyncState.Success) GreenReceivable else primaryColor
+                            tint = GreenReceivable
                         )
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    Button(
-                        onClick = { viewModel.triggerCloudSync() },
-                        enabled = syncState !is SyncState.Syncing,
-                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor, contentColor = Color.White),
+                    Surface(
+                        color = LightReceivableBg,
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        if (syncState is SyncState.Syncing) {
-                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Syncing Data to Cloud...", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        } else {
-                            Icon(Icons.Default.CloudUpload, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Sync Ledger Data to Cloud Now", fontWeight = FontWeight.Bold, fontSize = 13.sp, maxLines = 1)
+                        Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = GreenReceivable, modifier = Modifier.size(22.dp))
+                            Column {
+                                Text("100% Automatic Background Sync Active", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = GreenReceivable)
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text("All ledger entries, customers, and transactions automatically sync to Render cloud server in real-time. No manual button required.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f))
+                            }
                         }
                     }
                 }
