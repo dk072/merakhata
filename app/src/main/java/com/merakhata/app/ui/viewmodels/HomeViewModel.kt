@@ -12,6 +12,8 @@ import com.merakhata.app.domain.accounting.LedgerStatus
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.delay
 
 enum class CustomerFilter {
     ALL,
@@ -29,15 +31,32 @@ enum class CustomerSort {
 
 class HomeViewModel(private val repository: KhataRepository) : ViewModel() {
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing
+
     init {
-        refreshCloudData()
+        startAutoRefreshLoop()
     }
 
-    fun refreshCloudData() {
+    private fun startAutoRefreshLoop() {
         viewModelScope.launch {
-            val userId = repository.preferences.userId.firstOrNull()
-            if (!userId.isNullOrEmpty()) {
-                com.merakhata.app.domain.sync.CloudSyncEngine.fetchCloudDataAndRestore(repository, userId)
+            while (isActive) {
+                refreshCloudData(showLoading = false)
+                delay(10_000L) // 10 seconds auto-refresh loop
+            }
+        }
+    }
+
+    fun refreshCloudData(showLoading: Boolean = false) {
+        viewModelScope.launch {
+            if (showLoading) _isRefreshing.value = true
+            try {
+                val userId = repository.preferences.userId.firstOrNull()
+                if (!userId.isNullOrEmpty()) {
+                    com.merakhata.app.domain.sync.CloudSyncEngine.fetchCloudDataAndRestore(repository, userId)
+                }
+            } finally {
+                _isRefreshing.value = false
             }
         }
     }

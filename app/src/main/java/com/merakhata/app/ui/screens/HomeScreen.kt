@@ -50,6 +50,7 @@ fun HomeScreen(
     val selectedSort by viewModel.selectedSort.collectAsState()
     val businessName by viewModel.businessName.collectAsState()
     val ownerName by viewModel.ownerName.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     var showSortMenu by remember { mutableStateOf(false) }
 
@@ -105,8 +106,24 @@ fun HomeScreen(
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
+                    // Manual Refresh Button with Instant Cloud Pull
+                    IconButton(onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        viewModel.refreshCloudData(showLoading = true)
+                    }) {
+                        if (isRefreshing) {
+                            CircularProgressIndicator(
+                                color = PrimaryContainerNavy,
+                                strokeWidth = 2.5.dp,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        } else {
+                            Icon(Icons.Default.Refresh, contentDescription = "Refresh Cloud Data", tint = OnSurfaceDark)
+                        }
+                    }
+
                     IconButton(onClick = {}) {
                         Icon(Icons.Default.Search, contentDescription = "Search", tint = OnSurfaceDark)
                     }
