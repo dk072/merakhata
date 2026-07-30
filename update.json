@@ -1,7 +1,7 @@
 {
-    "versionCode":  30,
-    "versionName":  "1.0.29",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.29.apk",
-    "releaseNotes":  "?? Added Top Bar Refresh Button \u0026 10-Second Auto-Refresh Timer for real-time multi-device ledger sync",
+    "versionCode":  31,
+    "versionName":  "1.0.30",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.30.apk",
+    "releaseNotes":  "?? Manual push update request by user",
     "isMandatory":  false
 }
