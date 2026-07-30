@@ -53,6 +53,10 @@ fun HomeScreen(
 
     var showSortMenu by remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        viewModel.refreshCloudData()
+    }
+
     Scaffold(
         floatingActionButton = {
             ExtendedFloatingActionButton(

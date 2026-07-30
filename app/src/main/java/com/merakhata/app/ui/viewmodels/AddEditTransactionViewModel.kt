@@ -121,6 +121,7 @@ class AddEditTransactionViewModel(
                     updatedAt = System.currentTimeMillis()
                 )
                 repository.insertTransaction(entity)
+                com.merakhata.app.domain.sync.CloudSyncManager.syncAll(repository)
                 onSuccess()
             } finally {
                 _isSaving.value = false

@@ -4,13 +4,18 @@ const path = require('path');
 
 const os = require('os');
 
-// In-Memory & File-backed Database Store
-const DATA_FILE = path.join(os.tmpdir(), 'merakhata_db.json');
+// Persistent Database Store
+const DATA_FILE = path.join(process.cwd(), 'cloud_db', 'merakhata_db.json');
+const ALT_DATA_FILE = path.join(os.tmpdir(), 'merakhata_db.json');
 
 function loadDb() {
     try {
         if (fs.existsSync(DATA_FILE)) {
             const content = fs.readFileSync(DATA_FILE, 'utf8');
+            return JSON.parse(content);
+        }
+        if (fs.existsSync(ALT_DATA_FILE)) {
+            const content = fs.readFileSync(ALT_DATA_FILE, 'utf8');
             return JSON.parse(content);
         }
     } catch (e) {
@@ -27,7 +32,11 @@ function saveDb(db) {
         }
         fs.writeFileSync(DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
     } catch (e) {
-        console.error("Error writing DB file:", e);
+        try {
+            fs.writeFileSync(ALT_DATA_FILE, JSON.stringify(db, null, 2), 'utf8');
+        } catch (err) {
+            console.error("Error writing DB file:", err);
+        }
     }
 }
 

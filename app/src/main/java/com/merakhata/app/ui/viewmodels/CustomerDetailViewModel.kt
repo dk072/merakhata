@@ -38,12 +38,14 @@ class CustomerDetailViewModel(
     fun deleteTransaction(transaction: TransactionEntity) {
         viewModelScope.launch {
             repository.deleteTransaction(transaction)
+            com.merakhata.app.domain.sync.CloudSyncManager.syncAll(repository)
         }
     }
 
     fun deleteCustomer(onDeleted: () -> Unit) {
         viewModelScope.launch {
             repository.deleteCustomerById(customerId)
+            com.merakhata.app.domain.sync.CloudSyncManager.syncAll(repository)
             onDeleted()
         }
     }

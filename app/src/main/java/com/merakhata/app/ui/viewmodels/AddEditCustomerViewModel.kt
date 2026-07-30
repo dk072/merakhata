@@ -90,6 +90,7 @@ class AddEditCustomerViewModel(
                 updatedAt = System.currentTimeMillis()
             )
             repository.insertCustomer(entity)
+            com.merakhata.app.domain.sync.CloudSyncManager.syncAll(repository)
             onSuccess()
         }
     }

@@ -10,6 +10,8 @@ import com.merakhata.app.domain.accounting.CustomerLedgerSummary
 import com.merakhata.app.domain.accounting.DashboardSummary
 import com.merakhata.app.domain.accounting.LedgerStatus
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 
 enum class CustomerFilter {
     ALL,
@@ -26,6 +28,19 @@ enum class CustomerSort {
 }
 
 class HomeViewModel(private val repository: KhataRepository) : ViewModel() {
+
+    init {
+        refreshCloudData()
+    }
+
+    fun refreshCloudData() {
+        viewModelScope.launch {
+            val userId = repository.preferences.userId.firstOrNull()
+            if (!userId.isNullOrEmpty()) {
+                com.merakhata.app.domain.sync.CloudSyncEngine.fetchCloudDataAndRestore(repository, userId)
+            }
+        }
+    }
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery

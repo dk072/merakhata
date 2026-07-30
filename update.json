@@ -1,7 +1,7 @@
 {
-    "versionCode":  26,
-    "versionName":  "1.0.25",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.25.apk",
-    "releaseNotes":  "?? Connected to Live Render Backend Service (https://merakhata-backend-nsl2.onrender.com)",
+    "versionCode":  27,
+    "versionName":  "1.0.26",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.26.apk",
+    "releaseNotes":  "?? Real-time Multi-Device Sync Fix: Instant cloud backup \u0026 auto-restore across all logged-in devices",
     "isMandatory":  false
 }
