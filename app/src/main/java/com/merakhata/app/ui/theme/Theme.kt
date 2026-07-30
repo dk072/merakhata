@@ -13,17 +13,26 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val LightColorScheme = lightColorScheme(
-    primary = EmeraldPrimary,
-    secondary = DeepEmerald,
-    tertiary = WarmGold,
-    background = BackgroundLight,
-    surface = SurfaceLight,
+    primary = PrimaryDark,
     onPrimary = Color.White,
+    primaryContainer = PrimaryContainerNavy,
+    onPrimaryContainer = Color.White,
+    secondary = SecondaryTeal,
     onSecondary = Color.White,
-    onBackground = DeepCharcoal,
-    onSurface = DeepCharcoal,
-    outline = CardBorderLight,
-    surfaceVariant = Color(0xFFF1F5F9)
+    secondaryContainer = SecondaryContainerMint,
+    onSecondaryContainer = OnSecondaryContainerTeal,
+    error = ErrorRed,
+    onError = Color.White,
+    errorContainer = ErrorContainerPink,
+    onErrorContainer = OnErrorContainerRed,
+    tertiary = WarmGold,
+    background = SurfaceBg,
+    onBackground = OnSurfaceDark,
+    surface = SurfaceContainerLowest,
+    onSurface = OnSurfaceDark,
+    surfaceVariant = SurfaceContainerLow,
+    onSurfaceVariant = OnSurfaceVariantGray,
+    outline = OutlineVariantLight
 )
 
 private val DarkColorScheme = darkColorScheme(

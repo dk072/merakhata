@@ -1,7 +1,7 @@
 {
-    "versionCode":  23,
-    "versionName":  "1.0.22",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.22.apk",
-    "releaseNotes":  "?? Major Security Update: Server-side Authentication \u0026 Data Isolation Implemented",
+    "versionCode":  24,
+    "versionName":  "1.0.23",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.23.apk",
+    "releaseNotes":  "?? Redesigned UI with modern Mera Khata design system \u0026 ledger layout",
     "isMandatory":  false
 }

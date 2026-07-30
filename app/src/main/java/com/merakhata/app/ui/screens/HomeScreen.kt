@@ -60,12 +60,12 @@ fun HomeScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     onNavigateToAddCustomer()
                 },
-                icon = { Icon(Icons.Default.Add, contentDescription = null, tint = Color.White) },
-                text = { Text("+ ADD CUSTOMER", fontWeight = FontWeight.Bold, color = Color.White, letterSpacing = 0.5.sp) },
-                containerColor = EmeraldPrimary,
+                icon = { Icon(Icons.Default.PersonAdd, contentDescription = null, tint = Color.White) },
+                text = { Text("Add Customer", fontWeight = FontWeight.Bold, color = Color.White) },
+                containerColor = PrimaryContainerNavy,
                 contentColor = Color.White,
                 shape = RoundedCornerShape(24.dp),
-                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp)
             )
         }
     ) { padding ->
@@ -73,293 +73,338 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(BackgroundLight)
+                .background(SurfaceBg)
         ) {
-            // Header Bar with Crisp Khatabook Emerald Gradient
-            Box(
+            // Top App Bar
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
-                    .background(PrimaryHeaderGradient)
-                    .padding(horizontal = 20.dp, vertical = 20.dp)
+                    .height(64.dp)
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = if (businessName.isNotBlank()) businessName else "MERA KHATA",
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = Color.White,
-                                letterSpacing = (-0.3).sp
-                            )
-                            if (ownerName.isNotBlank()) {
-                                Text(
-                                    text = "Owner: $ownerName",
-                                    fontSize = 13.sp,
-                                    color = Color.White.copy(alpha = 0.9f)
-                                )
-                            }
-                        }
-                        Surface(
-                            color = Color.White.copy(alpha = 0.25f),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(
-                                text = "v1.0.9",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                            )
-                        }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu", tint = OnSurfaceDark)
                     }
+                    Text(
+                        text = if (businessName.isNotBlank()) businessName else "Mera Khata",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = OnSurfaceDark
+                    )
+                }
 
-                    Spacer(modifier = Modifier.height(18.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Default.Search, contentDescription = "Search", tint = OnSurfaceDark)
+                    }
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(SurfaceContainerHigh),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (ownerName.isNotBlank()) ownerName.take(2).uppercase() else "MK",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = OnSurfaceDark
+                        )
+                    }
+                }
+            }
 
-                    // Dashboard Premium Summary Card - Pure White High Contrast Card
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Dashboard Summary Card (Dark Navy Container)
+                item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                        colors = CardDefaults.cardColors(containerColor = PrimaryContainerNavy),
                         shape = RoundedCornerShape(20.dp),
-                        border = BorderStroke(1.dp, CardBorderLight)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(18.dp)
+                                .padding(20.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "You Will Receive",
-                                        fontSize = 13.sp,
-                                        color = MediumSlate,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = AccountingEngine.formatCurrency(dashboardSummary.totalReceivableMinor),
-                                        fontSize = 22.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = ReceivableGreen
-                                    )
-                                }
-
-                                VerticalDivider(
-                                    modifier = Modifier
-                                        .height(48.dp)
-                                        .padding(horizontal = 14.dp),
-                                    color = CardBorderLight
-                                )
-
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "You Will Pay",
-                                        fontSize = 13.sp,
-                                        color = MediumSlate,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = AccountingEngine.formatCurrency(dashboardSummary.totalPayableMinor),
-                                        fontSize = 22.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = PayableRed
-                                    )
-                                }
-                            }
-
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 14.dp),
-                                color = CardBorderLight
+                            Text(
+                                text = "TOTAL BALANCE",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White.copy(alpha = 0.7f),
+                                letterSpacing = 1.sp
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = AccountingEngine.formatCurrency(dashboardSummary.netBalanceMinor),
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = Color.White
                             )
 
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Breakdown Tiles
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                Text(
-                                    text = "Net Ledger Balance",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = DeepCharcoal
-                                )
-                                val netColor = when {
-                                    dashboardSummary.netBalanceMinor > 0 -> ReceivableGreen
-                                    dashboardSummary.netBalanceMinor < 0 -> PayableRed
-                                    else -> SettledGray
-                                }
-                                Surface(
-                                    color = netColor.copy(alpha = 0.12f),
-                                    shape = RoundedCornerShape(12.dp)
+                                // You'll Get
+                                Card(
+                                    modifier = Modifier.weight(1f),
+                                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f)),
+                                    shape = RoundedCornerShape(14.dp),
+                                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
                                 ) {
-                                    Text(
-                                        text = AccountingEngine.formatCurrency(dashboardSummary.netBalanceMinor),
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        color = netColor,
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
-                                    )
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(12.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.ArrowDownward,
+                                                contentDescription = null,
+                                                tint = SecondaryFixedDimMint,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                            Text(
+                                                text = "You'll Get",
+                                                fontSize = 11.sp,
+                                                color = Color.White.copy(alpha = 0.8f),
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = AccountingEngine.formatCurrency(dashboardSummary.totalReceivableMinor),
+                                            fontSize = 17.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = SecondaryFixedMint
+                                        )
+                                    }
+                                }
+
+                                // You'll Give
+                                Card(
+                                    modifier = Modifier.weight(1f),
+                                    colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f)),
+                                    shape = RoundedCornerShape(14.dp),
+                                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f))
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(12.dp)
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.ArrowUpward,
+                                                contentDescription = null,
+                                                tint = ErrorContainerPink,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                            Text(
+                                                text = "You'll Give",
+                                                fontSize = 11.sp,
+                                                color = Color.White.copy(alpha = 0.8f),
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = AccountingEngine.formatCurrency(dashboardSummary.totalPayableMinor),
+                                            fontSize = 17.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = ErrorContainerPink
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Search Bar & Sort Button
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { viewModel.onSearchQueryChange(it) },
-                    placeholder = { Text("Search customer by name or phone...", color = LightSlate) },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = EmeraldPrimary) },
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
-                                Icon(Icons.Default.Close, contentDescription = null, tint = MediumSlate)
-                            }
-                        }
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        focusedBorderColor = EmeraldPrimary,
-                        unfocusedBorderColor = CardBorderLight,
-                        focusedTextColor = DeepCharcoal,
-                        unfocusedTextColor = DeepCharcoal
-                    ),
-                    modifier = Modifier.weight(1f)
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                IconButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        showSortMenu = true
-                    },
-                    modifier = Modifier
-                        .size(52.dp)
-                        .background(Color.White, RoundedCornerShape(16.dp))
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort", tint = EmeraldPrimary)
-                }
-
-                DropdownMenu(
-                    expanded = showSortMenu,
-                    onDismissRequest = { showSortMenu = false }
-                ) {
-                    CustomerSort.values().forEach { sort ->
-                        DropdownMenuItem(
-                            text = {
-                                val label = when (sort) {
-                                    CustomerSort.NAME_AZ -> "Name A-Z"
-                                    CustomerSort.HIGHEST_BALANCE -> "Highest Balance"
-                                    CustomerSort.LOWEST_BALANCE -> "Lowest Balance"
-                                    CustomerSort.RECENTLY_UPDATED -> "Recently Updated"
+                // Quick Search & Filter Row
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { viewModel.onSearchQueryChange(it) },
+                            placeholder = { Text("Search customers...", color = OutlineGray, fontSize = 14.sp) },
+                            leadingIcon = { Icon(Icons.Default.PersonSearch, contentDescription = null, tint = OutlineGray) },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
+                                        Icon(Icons.Default.Close, contentDescription = null, tint = OutlineGray)
+                                    }
                                 }
-                                Text(label, fontWeight = if (sort == selectedSort) FontWeight.Bold else FontWeight.Normal, color = DeepCharcoal)
                             },
+                            singleLine = true,
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = SurfaceContainerLow,
+                                unfocusedContainerColor = SurfaceContainerLow,
+                                focusedBorderColor = Color.Transparent,
+                                unfocusedBorderColor = Color.Transparent,
+                                focusedTextColor = OnSurfaceDark,
+                                unfocusedTextColor = OnSurfaceDark
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        IconButton(
                             onClick = {
-                                viewModel.onSortSelect(sort)
-                                showSortMenu = false
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                showSortMenu = true
+                            },
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(SurfaceContainer, RoundedCornerShape(14.dp))
+                        ) {
+                            Icon(Icons.Default.FilterList, contentDescription = "Filter", tint = OnSurfaceDark)
+                        }
+
+                        DropdownMenu(
+                            expanded = showSortMenu,
+                            onDismissRequest = { showSortMenu = false }
+                        ) {
+                            CustomerSort.values().forEach { sort ->
+                                DropdownMenuItem(
+                                    text = {
+                                        val label = when (sort) {
+                                            CustomerSort.NAME_AZ -> "Name A-Z"
+                                            CustomerSort.HIGHEST_BALANCE -> "Highest Balance"
+                                            CustomerSort.LOWEST_BALANCE -> "Lowest Balance"
+                                            CustomerSort.RECENTLY_UPDATED -> "Recently Updated"
+                                        }
+                                        Text(label, fontWeight = if (sort == selectedSort) FontWeight.Bold else FontWeight.Normal, color = OnSurfaceDark)
+                                    },
+                                    onClick = {
+                                        viewModel.onSortSelect(sort)
+                                        showSortMenu = false
+                                    }
+                                )
                             }
-                        )
+                        }
                     }
                 }
-            }
 
-            // Filter Chips (Horizontally Scrollable for Mobile Responsiveness)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                CustomerFilter.values().forEach { filter ->
-                    val isSelected = filter == selectedFilter
-                    val label = when (filter) {
-                        CustomerFilter.ALL -> "All Accounts"
-                        CustomerFilter.YOU_WILL_RECEIVE -> "You Receive"
-                        CustomerFilter.YOU_WILL_PAY -> "You Pay"
-                        CustomerFilter.SETTLED -> "Settled"
+                // Filter Chips
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        CustomerFilter.values().forEach { filter ->
+                            val isSelected = filter == selectedFilter
+                            val label = when (filter) {
+                                CustomerFilter.ALL -> "All"
+                                CustomerFilter.YOU_WILL_RECEIVE -> "Got"
+                                CustomerFilter.YOU_WILL_PAY -> "Gave"
+                                CustomerFilter.SETTLED -> "Settled"
+                            }
+                            Button(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    viewModel.onFilterSelect(filter)
+                                },
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isSelected) PrimaryContainerNavy else SurfaceContainerHigh,
+                                    contentColor = if (isSelected) Color.White else OnSurfaceVariantGray
+                                ),
+                                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                                modifier = Modifier.height(36.dp)
+                            ) {
+                                Text(label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
                     }
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            viewModel.onFilterSelect(filter)
-                        },
-                        label = { Text(label, fontSize = 12.sp, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium) },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = FilterChipDefaults.filterChipColors(
-                            containerColor = Color.White,
-                            labelColor = DeepCharcoal,
-                            selectedContainerColor = EmeraldPrimary,
-                            selectedLabelColor = Color.White
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            borderColor = CardBorderLight,
-                            selectedBorderColor = EmeraldPrimary,
-                            enabled = true,
-                            selected = isSelected
-                        )
-                    )
                 }
-            }
 
-            // Customer Accounts List
-            if (customers.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            Icons.Default.PeopleOutline,
-                            contentDescription = null,
-                            tint = EmeraldPrimary.copy(alpha = 0.5f),
-                            modifier = Modifier.size(56.dp)
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
+                // Section Title: Recent Customers
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = if (searchQuery.isNotEmpty()) "No customer matches your search." else "No customer accounts yet.\nTap '+ ADD CUSTOMER' to get started.",
-                            color = MediumSlate,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Medium
+                            text = "Recent Customers",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = OnSurfaceDark
                         )
+                        TextButton(onClick = { viewModel.onFilterSelect(CustomerFilter.ALL) }) {
+                            Text("View All", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = PrimaryDark)
+                        }
                     }
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
+
+                // Customer Accounts List
+                if (customers.isEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 20.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            shape = RoundedCornerShape(16.dp),
+                            border = BorderStroke(1.dp, OutlineVariantLight.copy(alpha = 0.4f))
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    Icons.Default.PeopleOutline,
+                                    contentDescription = null,
+                                    tint = OutlineGray,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = if (searchQuery.isNotEmpty()) "No customer matches your search." else "No customer accounts yet.\nTap 'Add Customer' to get started.",
+                                    color = OnSurfaceVariantGray,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+                } else {
                     items(customers, key = { it.customer.id }) { item ->
                         CustomerCard(
                             summary = item,
@@ -369,6 +414,64 @@ fun HomeScreen(
                             }
                         )
                     }
+                }
+
+                // Monthly Collection Target Section
+                item {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp),
+                        colors = CardDefaults.cardColors(containerColor = SurfaceContainerLow),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Monthly Collection Target",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = OnSurfaceDark
+                                )
+                                Text(
+                                    text = "65% Achieved",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PrimaryDark
+                                )
+                            }
+
+                            LinearProgressIndicator(
+                                progress = { 0.65f },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(8.dp)
+                                    .clip(CircleShape),
+                                color = SecondaryTeal,
+                                trackColor = SurfaceContainer
+                            )
+
+                            Text(
+                                text = "₹ 2.5L collected out of ₹ 4L target.",
+                                fontSize = 12.sp,
+                                color = OutlineGray
+                            )
+                        }
+                    }
+                }
+
+                // Bottom padding for FAB and Navigation bar
+                item {
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
             }
         }
@@ -385,9 +488,9 @@ fun CustomerCard(
             .fillMaxWidth()
             .clickable { onClick() },
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, CardBorderLight)
+        border = BorderStroke(1.dp, OutlineVariantLight.copy(alpha = 0.4f))
     ) {
         Row(
             modifier = Modifier
@@ -395,19 +498,19 @@ fun CustomerCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Customer Avatar with Gradient Accent
+            // Customer Avatar
             Box(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(PrimaryHeaderGradient),
+                    .background(SurfaceContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = summary.customer.name.take(1).uppercase(),
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = OnSurfaceDark
                 )
             }
 
@@ -417,23 +520,22 @@ fun CustomerCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = summary.customer.name,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    color = DeepCharcoal
+                    color = OnSurfaceDark
                 )
-                if (!summary.customer.phone.isNullOrEmpty()) {
-                    Text(
-                        text = summary.customer.phone,
-                        fontSize = 13.sp,
-                        color = LightSlate
-                    )
-                }
                 if (summary.lastTransactionDate != null) {
                     val dateStr = SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault()).format(Date(summary.lastTransactionDate))
                     Text(
-                        text = "Last: $dateStr",
-                        fontSize = 11.sp,
-                        color = LightSlate
+                        text = "Updated $dateStr",
+                        fontSize = 12.sp,
+                        color = OutlineGray
+                    )
+                } else if (!summary.customer.phone.isNullOrEmpty()) {
+                    Text(
+                        text = summary.customer.phone,
+                        fontSize = 12.sp,
+                        color = OutlineGray
                     )
                 }
             }
@@ -441,34 +543,25 @@ fun CustomerCard(
             // Balance Column with Pill Badge
             Column(horizontalAlignment = Alignment.End) {
                 val (amtColor, labelText) = when (summary.status) {
-                    LedgerStatus.YOU_WILL_RECEIVE -> Pair(ReceivableGreen, "You Receive")
-                    LedgerStatus.YOU_WILL_PAY -> Pair(PayableRed, "You Pay")
-                    LedgerStatus.SETTLED -> Pair(SettledGray, "Settled")
+                    LedgerStatus.YOU_WILL_RECEIVE -> Pair(SecondaryTeal, "YOU'LL GET")
+                    LedgerStatus.YOU_WILL_PAY -> Pair(ErrorRed, "YOU'LL GIVE")
+                    LedgerStatus.SETTLED -> Pair(OutlineGray, "SETTLED")
                 }
 
-                Surface(
-                    color = amtColor.copy(alpha = 0.12f),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.End,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = AccountingEngine.formatCurrency(kotlin.math.abs(summary.netBalanceMinor)),
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = amtColor
-                        )
-
-                        Text(
-                            text = labelText,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = amtColor
-                        )
-                    }
-                }
+                Text(
+                    text = labelText,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = amtColor,
+                    letterSpacing = 0.5.sp
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = AccountingEngine.formatCurrency(kotlin.math.abs(summary.netBalanceMinor)),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = amtColor
+                )
             }
         }
     }

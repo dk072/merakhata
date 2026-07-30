@@ -5,13 +5,17 @@ import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.automirrored.filled.CallMade
+import androidx.compose.material.icons.automirrored.filled.CallReceived
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -49,18 +53,27 @@ fun CustomerDetailScreen(
     val summary by viewModel.summary.collectAsState()
     val transactions by viewModel.transactions.collectAsState()
 
+    var selectedFilter by remember { mutableStateOf("ALL") }
     var showDeleteCustDialog by remember { mutableStateOf(false) }
     var selectedTxForDelete by remember { mutableStateOf<TransactionEntity?>(null) }
     var showMenu by remember { mutableStateOf(false) }
 
     if (customer == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = DeepEmerald)
+            CircularProgressIndicator(color = SecondaryTeal)
         }
         return
     }
 
     val cust = customer!!
+
+    val filteredTransactions = remember(transactions, selectedFilter) {
+        when (selectedFilter) {
+            "GAVE" -> transactions.filter { it.type == TransactionType.YOU_GAVE }
+            "GOT" -> transactions.filter { it.type == TransactionType.YOU_GOT }
+            else -> transactions
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -68,9 +81,9 @@ fun CustomerDetailScreen(
                 title = {
                     Text(
                         text = cust.name,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 19.sp,
-                        color = Color.White
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = OnSurfaceDark
                     )
                 },
                 navigationIcon = {
@@ -78,12 +91,20 @@ fun CustomerDetailScreen(
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onNavigateBack()
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = OnSurfaceDark)
                     }
                 },
                 actions = {
+                    if (!cust.phone.isNullOrEmpty()) {
+                        IconButton(onClick = {
+                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${cust.phone}"))
+                            context.startActivity(intent)
+                        }) {
+                            Icon(Icons.Default.Call, contentDescription = "Call", tint = OnSurfaceDark)
+                        }
+                    }
                     IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Options", tint = Color.White)
+                        Icon(Icons.Default.MoreVert, contentDescription = "Options", tint = OnSurfaceDark)
                     }
                     DropdownMenu(
                         expanded = showMenu,
@@ -91,7 +112,7 @@ fun CustomerDetailScreen(
                     ) {
                         DropdownMenuItem(
                             text = { Text("Generate PDF Statement") },
-                            leadingIcon = { Icon(Icons.Default.PictureAsPdf, contentDescription = null, tint = DeepEmerald) },
+                            leadingIcon = { Icon(Icons.Default.PictureAsPdf, contentDescription = null, tint = SecondaryTeal) },
                             onClick = {
                                 showMenu = false
                                 viewModel.generateAndSharePdf(context)
@@ -99,7 +120,7 @@ fun CustomerDetailScreen(
                         )
                         DropdownMenuItem(
                             text = { Text("Share Text Summary") },
-                            leadingIcon = { Icon(Icons.Default.Share, contentDescription = null, tint = DeepEmerald) },
+                            leadingIcon = { Icon(Icons.Default.Share, contentDescription = null, tint = SecondaryTeal) },
                             onClick = {
                                 showMenu = false
                                 val text = viewModel.generateShareSummaryText()
@@ -112,15 +133,15 @@ fun CustomerDetailScreen(
                         )
                         DropdownMenuItem(
                             text = { Text("Edit Customer Profile") },
-                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null, tint = DeepEmerald) },
+                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null, tint = SecondaryTeal) },
                             onClick = {
                                 showMenu = false
                                 onNavigateToEditCustomer(cust.id)
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Delete Customer", color = PayableRed, fontWeight = FontWeight.Bold) },
-                            leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = PayableRed) },
+                            text = { Text("Delete Customer", color = ErrorRed, fontWeight = FontWeight.Bold) },
+                            leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = ErrorRed) },
                             onClick = {
                                 showMenu = false
                                 showDeleteCustDialog = true
@@ -129,19 +150,19 @@ fun CustomerDetailScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = HeaderGradientStart,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                    actionIconContentColor = Color.White
+                    containerColor = SurfaceBg,
+                    titleContentColor = OnSurfaceDark,
+                    navigationIconContentColor = OnSurfaceDark,
+                    actionIconContentColor = OnSurfaceDark
                 )
             )
         },
         bottomBar = {
             // Sticky Bottom Action Buttons: YOU GAVE & YOU GOT
             Surface(
-                tonalElevation = 8.dp,
-                shadowElevation = 10.dp,
-                color = MaterialTheme.colorScheme.surface
+                tonalElevation = 6.dp,
+                shadowElevation = 8.dp,
+                color = SurfaceBg
             ) {
                 Row(
                     modifier = Modifier
@@ -149,34 +170,44 @@ fun CustomerDetailScreen(
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Box(
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateToAddTransaction(cust.id, "YOU_GAVE", null)
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = ErrorRed),
+                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
                             .weight(1f)
                             .height(52.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(ActionGaveGradient)
-                            .clickable {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onNavigateToAddTransaction(cust.id, "YOU_GAVE", null)
-                            },
-                        contentAlignment = Alignment.Center
                     ) {
-                        Text("YOU GAVE ₹", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = 0.5.sp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(Icons.Default.RemoveCircle, contentDescription = null, tint = Color.White)
+                            Text("You Gave", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
                     }
 
-                    Box(
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateToAddTransaction(cust.id, "YOU_GOT", null)
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = SecondaryTeal),
+                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
                             .weight(1f)
                             .height(52.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(ActionGotGradient)
-                            .clickable {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onNavigateToAddTransaction(cust.id, "YOU_GOT", null)
-                            },
-                        contentAlignment = Alignment.Center
                     ) {
-                        Text("YOU GOT ₹", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = 0.5.sp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(Icons.Default.AddCircle, contentDescription = null, tint = Color.White)
+                            Text("You Got", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
                     }
                 }
             }
@@ -186,156 +217,199 @@ fun CustomerDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(MaterialTheme.colorScheme.background)
+                .background(SurfaceBg)
         ) {
-            // Header Balance Card with Rich Gradient
-            Box(
+            LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(PrimaryHeaderGradient)
-                    .padding(horizontal = 20.dp, vertical = 20.dp),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    val statusStr = when (summary?.status) {
-                        LedgerStatus.YOU_WILL_RECEIVE -> "YOU WILL RECEIVE"
-                        LedgerStatus.YOU_WILL_PAY -> "YOU WILL PAY"
-                        else -> "SETTLED"
-                    }
-                    Text(
-                        text = "Current Account Balance",
-                        fontSize = 12.sp,
-                        color = Color.White.copy(alpha = 0.85f),
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = AccountingEngine.formatCurrency(kotlin.math.abs(summary?.netBalanceMinor ?: 0L)),
-                        fontSize = 34.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Surface(
-                        color = Color.White.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(12.dp)
+                // Customer Contact Header Section
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        border = BorderStroke(1.dp, OutlineVariantLight.copy(alpha = 0.4f))
                     ) {
-                        Text(
-                            text = statusStr,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 5.dp)
-                        )
-                    }
-
-                    // Call / SMS / WhatsApp Quick Action Buttons
-                    if (!cust.phone.isNullOrEmpty()) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Button(
-                                onClick = {
-                                    val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${cust.phone}"))
-                                    context.startActivity(intent)
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.22f)),
-                                shape = RoundedCornerShape(12.dp),
-                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Avatar Badge
+                            Box(
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .clip(CircleShape)
+                                    .background(PrimaryContainerNavy),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Icon(Icons.Default.Call, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("Call", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                Text(
+                                    text = cust.name.take(2).uppercase(),
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
                             }
 
-                            Button(
-                                onClick = {
-                                    val amtStr = AccountingEngine.formatCurrency(kotlin.math.abs(summary?.netBalanceMinor ?: 0L))
-                                    val msg = "Namaste ${cust.name}, aapke khate me $amtStr pending hai. Payment kar dena."
-                                    val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:${cust.phone}")).apply {
-                                        putExtra("sms_body", msg)
-                                    }
-                                    context.startActivity(intent)
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.22f)),
-                                shape = RoundedCornerShape(12.dp),
-                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Text(
+                                text = cust.name,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = OnSurfaceDark
+                            )
+
+                            if (!cust.phone.isNullOrEmpty()) {
+                                Text(
+                                    text = cust.phone,
+                                    fontSize = 13.sp,
+                                    color = OutlineGray
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Net Balance Breakdown Card
+                            val (badgeBg, badgeText, amtColor, badgeLabel) = when (summary?.status) {
+                                LedgerStatus.YOU_WILL_RECEIVE -> Tuple4(SecondaryContainerMint, OnSecondaryContainerTeal, SecondaryTeal, "You'll Get")
+                                LedgerStatus.YOU_WILL_PAY -> Tuple4(ErrorContainerPink, OnErrorContainerRed, ErrorRed, "You'll Give")
+                                else -> Tuple4(SurfaceContainerHigh, OnSurfaceDark, OutlineGray, "Settled")
+                            }
+
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = SurfaceContainerLow),
+                                shape = RoundedCornerShape(14.dp),
+                                border = BorderStroke(1.dp, OutlineVariantLight.copy(alpha = 0.3f))
                             ) {
-                                Icon(Icons.AutoMirrored.Filled.Message, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text("SMS", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = "NET BALANCE",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = OutlineGray,
+                                            letterSpacing = 0.8.sp
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = AccountingEngine.formatCurrency(kotlin.math.abs(summary?.netBalanceMinor ?: 0L)),
+                                            fontSize = 28.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = amtColor
+                                        )
+                                    }
+
+                                    Surface(
+                                        color = badgeBg,
+                                        shape = RoundedCornerShape(20.dp)
+                                    ) {
+                                        Text(
+                                            text = badgeLabel,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = badgeText,
+                                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Transaction History Header
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Transaction History",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "${transactions.size} records",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                )
-            }
-
-            // Timeline List
-            if (transactions.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            Icons.Default.ReceiptLong,
-                            contentDescription = null,
-                            tint = DeepEmerald.copy(alpha = 0.4f),
-                            modifier = Modifier.size(52.dp)
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = "No transactions recorded yet.\nTap 'YOU GAVE ₹' or 'YOU GOT ₹' below to add.",
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                // Filter Chips (All, Gave, Got)
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listOf("ALL" to "All", "GAVE" to "Gave", "GOT" to "Got").forEach { (filterKey, label) ->
+                            val isSelected = selectedFilter == filterKey
+                            Button(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    selectedFilter = filterKey
+                                },
+                                shape = RoundedCornerShape(20.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isSelected) PrimaryContainerNavy else SurfaceContainerHigh,
+                                    contentColor = if (isSelected) Color.White else OnSurfaceVariantGray
+                                ),
+                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
+                                modifier = Modifier.height(36.dp)
+                            ) {
+                                Text(label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
                     }
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp, vertical = 6.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    items(transactions, key = { it.id }) { tx ->
-                        TransactionItemCard(
+
+                // Transaction List
+                if (filteredTransactions.isEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            shape = RoundedCornerShape(16.dp),
+                            border = BorderStroke(1.dp, OutlineVariantLight.copy(alpha = 0.4f))
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(32.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    Icons.Default.ReceiptLong,
+                                    contentDescription = null,
+                                    tint = OutlineGray,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(
+                                    text = "No transactions recorded yet.\nTap 'You Gave' or 'You Got' below to add.",
+                                    color = OnSurfaceVariantGray,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    items(filteredTransactions, key = { it.id }) { tx ->
+                        TransactionRowItem(
                             tx = tx,
                             onEdit = { onNavigateToAddTransaction(cust.id, tx.type.name, tx.id) },
                             onDelete = { selectedTxForDelete = tx }
                         )
                     }
                 }
+
+                item {
+                    Spacer(modifier = Modifier.height(80.dp))
+                }
             }
         }
     }
 
-    // Delete Modals
+    // Delete Confirmation Modals
     if (showDeleteCustDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteCustDialog = false },
@@ -347,7 +421,7 @@ fun CustomerDetailScreen(
                         showDeleteCustDialog = false
                         viewModel.deleteCustomer(onDeleted = onNavigateBack)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = PayableRed)
+                    colors = ButtonDefaults.buttonColors(containerColor = ErrorRed)
                 ) {
                     Text("Delete Permanently", color = Color.White, fontWeight = FontWeight.Bold)
                 }
@@ -371,7 +445,7 @@ fun CustomerDetailScreen(
                         viewModel.deleteTransaction(selectedTxForDelete!!)
                         selectedTxForDelete = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = PayableRed)
+                    colors = ButtonDefaults.buttonColors(containerColor = ErrorRed)
                 ) {
                     Text("Delete Record", color = Color.White, fontWeight = FontWeight.Bold)
                 }
@@ -385,84 +459,99 @@ fun CustomerDetailScreen(
     }
 }
 
+private data class Tuple4<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
+
 @Composable
-fun TransactionItemCard(
+fun TransactionRowItem(
     tx: TransactionEntity,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     val isGave = tx.type == TransactionType.YOU_GAVE
-    val dateStr = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(tx.transactionDate))
-    val timeStr = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(tx.transactionDate))
+    val dateStr = SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault()).format(Date(tx.transactionDate))
+    val accentColor = if (isGave) ErrorRed else SecondaryTeal
+    val iconBg = if (isGave) ErrorContainerPink else SecondaryContainerMint
+    val iconColor = if (isGave) ErrorRed else SecondaryTeal
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isGave) LightPayableBg else LightReceivableBg
-        ),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, if (isGave) PayableRed.copy(alpha = 0.2f) else ReceivableGreen.copy(alpha = 0.2f))
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onEdit() },
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(14.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, OutlineVariantLight.copy(alpha = 0.4f))
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp)
+                .height(IntrinsicSize.Min)
         ) {
+            // Left Accent Bar
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(accentColor)
+            )
+
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Surface(
-                        color = if (isGave) PayableRed.copy(alpha = 0.15f) else ReceivableGreen.copy(alpha = 0.15f),
-                        shape = RoundedCornerShape(8.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(iconBg),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = if (isGave) "YOU GAVE (DEBIT)" else "YOU GOT (CREDIT)",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = if (isGave) PayableRed else ReceivableGreen,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                        Icon(
+                            imageVector = if (isGave) Icons.AutoMirrored.Filled.CallMade else Icons.AutoMirrored.Filled.CallReceived,
+                            contentDescription = null,
+                            tint = iconColor,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "$dateStr, $timeStr",
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
+
+                    Column {
+                        Text(
+                            text = tx.description?.takeIf { it.isNotBlank() } ?: if (isGave) "Material / Cash Given" else "Payment Received",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = OnSurfaceDark
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = dateStr,
+                            fontSize = 12.sp,
+                            color = OutlineGray
+                        )
+                    }
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = AccountingEngine.formatCurrency(tx.amountMinor),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = if (isGave) PayableRed else ReceivableGreen
+                        color = accentColor
                     )
-
-                    Spacer(modifier = Modifier.width(6.dp))
-
-                    IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
-                    }
-                    IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete", modifier = Modifier.size(16.dp), tint = PayableRed)
-                    }
+                    Text(
+                        text = if (isGave) "You Gave" else "You Got",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = accentColor
+                    )
                 }
-            }
-
-            if (!tx.description.isNullOrEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                HorizontalDivider(color = (if (isGave) PayableRed else ReceivableGreen).copy(alpha = 0.15f))
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = tx.description,
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
-                    fontWeight = FontWeight.Medium
-                )
             }
         }
     }

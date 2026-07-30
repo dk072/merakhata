@@ -12,12 +12,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Backspace
-import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -50,7 +50,7 @@ fun AddEditTransactionScreen(
     val isSaving by viewModel.isSaving.collectAsState()
 
     val isGave = type == TransactionType.YOU_GAVE
-    val themeColor = if (isGave) PayableRed else ReceivableGreen
+    val themeColor = if (isGave) ErrorRed else SecondaryTeal
 
     val calendar = remember { Calendar.getInstance() }
 
@@ -88,19 +88,25 @@ fun AddEditTransactionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isGave) "You Gave (Debit Record)" else "You Got (Credit Record)", fontWeight = FontWeight.ExtraBold, color = Color.White) },
+                title = { Text("Add Entry", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = OnSurfaceDark) },
                 navigationIcon = {
                     IconButton(onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         onNavigateBack()
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = OnSurfaceDark)
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Default.History, contentDescription = "History", tint = OnSurfaceDark)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = themeColor,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = SurfaceBg,
+                    titleContentColor = OnSurfaceDark,
+                    navigationIconContentColor = OnSurfaceDark,
+                    actionIconContentColor = OnSurfaceDark
                 )
             )
         }
@@ -109,19 +115,20 @@ fun AddEditTransactionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(MaterialTheme.colorScheme.background)
+                .background(SurfaceBg)
         ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Type Selector Segmented Tabs
+                // Transaction Type Segmented Toggle
                 Surface(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(16.dp),
+                    color = SurfaceContainer,
+                    shape = RoundedCornerShape(24.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -133,121 +140,216 @@ fun AddEditTransactionScreen(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(46.dp)
-                                .background(if (isGave) PayableRed else Color.Transparent, RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(if (isGave) ErrorContainerPink else Color.Transparent)
                                 .clickable {
                                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     viewModel.onTypeChange(TransactionType.YOU_GAVE)
                                 },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("YOU GAVE (DEBIT)", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = if (isGave) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            Text(
+                                "You Gave",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                color = if (isGave) OnErrorContainerRed else OnSurfaceVariantGray
+                            )
                         }
 
                         Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(46.dp)
-                                .background(if (!isGave) ReceivableGreen else Color.Transparent, RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(if (!isGave) SecondaryContainerMint else Color.Transparent)
                                 .clickable {
                                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                     viewModel.onTypeChange(TransactionType.YOU_GOT)
                                 },
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("YOU GOT (CREDIT)", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp, color = if (!isGave) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
+                            Text(
+                                "You Got",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                color = if (!isGave) OnSecondaryContainerTeal else OnSurfaceVariantGray
+                            )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Display Amount Card
+                // Amount Input Section Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    shape = RoundedCornerShape(20.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    border = BorderStroke(1.dp, OutlineVariantLight.copy(alpha = 0.4f))
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                    ) {
+                        Text(
+                            text = "Amount",
+                            fontSize = 12.sp,
+                            color = OnSurfaceVariantGray,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "₹",
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = OnSurfaceDark,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                            Text(
+                                text = amountInput.ifEmpty { "0.00" },
+                                fontSize = 36.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = themeColor
+                            )
+                        }
+
+                        if (amountError != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(amountError!!, color = ErrorRed, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                // Detail Inputs Card
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    border = BorderStroke(1.dp, OutlineVariantLight.copy(alpha = 0.4f))
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Text("Enter Amount", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontWeight = FontWeight.Medium)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "₹${amountInput.ifEmpty { "0" }}",
-                            fontSize = 40.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = themeColor
-                        )
+                        // Description Field
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                text = "What was this for?",
+                                fontSize = 12.sp,
+                                color = OnSurfaceVariantGray,
+                                fontWeight = FontWeight.Medium
+                            )
+                            OutlinedTextField(
+                                value = description,
+                                onValueChange = { viewModel.onDescriptionChange(it) },
+                                placeholder = { Text("Enter description (e.g. Chai, Rent...)", fontSize = 14.sp, color = OutlineGray) },
+                                leadingIcon = { Icon(Icons.Default.Description, contentDescription = null, tint = OutlineGray) },
+                                singleLine = true,
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedContainerColor = SurfaceContainerLow.copy(alpha = 0.5f),
+                                    unfocusedContainerColor = SurfaceContainerLow.copy(alpha = 0.5f),
+                                    focusedBorderColor = PrimaryContainerNavy,
+                                    unfocusedBorderColor = OutlineVariantLight.copy(alpha = 0.4f),
+                                    focusedTextColor = OnSurfaceDark,
+                                    unfocusedTextColor = OnSurfaceDark
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
 
-                        if (amountError != null) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(amountError!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        // Date Picker Field
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(
+                                text = "Date",
+                                fontSize = 12.sp,
+                                color = OnSurfaceVariantGray,
+                                fontWeight = FontWeight.Medium
+                            )
+                            val dateStr = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault()).format(Date(transactionDate))
+                            OutlinedButton(
+                                onClick = { showDatePicker() },
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, OutlineVariantLight.copy(alpha = 0.4f)),
+                                colors = ButtonDefaults.outlinedButtonColors(containerColor = SurfaceContainerLow.copy(alpha = 0.5f)),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(52.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Start
+                                ) {
+                                    Icon(Icons.Default.CalendarToday, contentDescription = null, tint = OutlineGray, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(dateStr, fontSize = 14.sp, color = OnSurfaceDark, fontWeight = FontWeight.Medium)
+                                }
+                            }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Date & Time Selectors Card
+                // Attachments Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    shape = RoundedCornerShape(20.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    border = BorderStroke(1.dp, OutlineVariantLight.copy(alpha = 0.4f))
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val dateStr = SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(transactionDate))
-                            val timeStr = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(transactionDate))
-
-                            OutlinedButton(
-                                onClick = { showDatePicker() },
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(Icons.Default.CalendarToday, contentDescription = null, modifier = Modifier.size(16.dp), tint = themeColor)
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(dateStr, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            }
-
-                            OutlinedButton(
-                                onClick = { showTimePicker() },
-                                shape = RoundedCornerShape(12.dp),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(16.dp), tint = themeColor)
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(timeStr, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                            }
+                            Text(
+                                text = "Attachments",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = OnSurfaceDark
+                            )
+                            Text(
+                                text = "Optional",
+                                fontSize = 12.sp,
+                                color = OutlineGray
+                            )
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Description Field
-                        OutlinedTextField(
-                            value = description,
-                            onValueChange = { viewModel.onDescriptionChange(it) },
-                            label = { Text("Description / Bill Details / Notes") },
-                            leadingIcon = { Icon(Icons.AutoMirrored.Filled.Notes, contentDescription = null, tint = themeColor) },
-                            shape = RoundedCornerShape(14.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = themeColor,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        Surface(
+                            onClick = {},
+                            shape = RoundedCornerShape(12.dp),
+                            color = SurfaceContainerLow,
+                            border = BorderStroke(1.dp, OutlineVariantLight.copy(alpha = 0.5f)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Icon(Icons.Default.AddAPhoto, contentDescription = null, tint = OutlineGray, modifier = Modifier.size(24.dp))
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text("Add Bill Photo", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = OnSurfaceVariantGray)
+                            }
+                        }
                     }
                 }
             }
 
-            // Custom Keypad Component
+            // Numeric Keypad & Bottom Save Action Button
             NumericKeypad(
                 onKeyClick = { char ->
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -258,7 +360,7 @@ fun AddEditTransactionScreen(
                     viewModel.saveTransaction(onSuccess = onNavigateBack)
                 },
                 isSaving = isSaving,
-                themeColor = themeColor
+                isGave = isGave
             )
         }
     }
@@ -269,16 +371,16 @@ fun NumericKeypad(
     onKeyClick: (String) -> Unit,
     onSave: () -> Unit,
     isSaving: Boolean,
-    themeColor: Color
+    isGave: Boolean
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.surface,
+        color = SurfaceBg,
         shadowElevation = 8.dp
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(16.dp)
         ) {
             val keys = listOf(
                 listOf("1", "2", "3"),
@@ -290,35 +392,35 @@ fun NumericKeypad(
             keys.forEach { row ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     row.forEach { key ->
                         Box(
                             modifier = Modifier
                                 .weight(1f)
-                                .height(54.dp)
-                                .padding(2.dp)
-                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                                .height(48.dp)
+                                .padding(vertical = 2.dp)
+                                .background(SurfaceContainerHigh, RoundedCornerShape(12.dp))
                                 .clickable { onKeyClick(key) },
                             contentAlignment = Alignment.Center
                         ) {
                             if (key == "BACKSPACE") {
-                                Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = "Backspace", tint = MaterialTheme.colorScheme.onSurface)
+                                Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = "Backspace", tint = OnSurfaceDark)
                             } else {
-                                Text(key, fontSize = 22.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                                Text(key, fontSize = 20.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, color = OnSurfaceDark)
                             }
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             Button(
                 onClick = onSave,
                 enabled = !isSaving,
-                colors = ButtonDefaults.buttonColors(containerColor = themeColor),
-                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = PrimaryDark),
+                shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
@@ -326,7 +428,18 @@ fun NumericKeypad(
                 if (isSaving) {
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                 } else {
-                    Text("SAVE TRANSACTION", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = 0.5.sp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = null, tint = Color.White)
+                        Text(
+                            text = if (isGave) "Save Giving" else "Save Getting",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
                 }
             }
         }
