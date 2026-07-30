@@ -81,6 +81,9 @@ object CloudSyncEngine {
             if (validation.isValid) {
                 val backupObj = JSONObject(cloudJsonStr)
                 
+                // Clear stale local data so deletions on other devices reflect properly!
+                repository.clearAllLocalData()
+
                 if (backupObj.has("customers")) {
                     val custArray = backupObj.getJSONArray("customers")
                     for (i in 0 until custArray.length()) {
