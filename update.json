@@ -1,7 +1,7 @@
 {
-    "versionCode":  24,
-    "versionName":  "1.0.23",
-    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.23.apk",
-    "releaseNotes":  "?? Redesigned UI with modern Mera Khata design system \u0026 ledger layout",
+    "versionCode":  25,
+    "versionName":  "1.0.24",
+    "apkUrl":  "https://raw.githubusercontent.com/dk072/merakhata/main/MeraKhata_v1.0.24.apk",
+    "releaseNotes":  "?? Switched Authentication \u0026 Cloud Sync to Render Web Service Backend (Firebase Removed)",
     "isMandatory":  false
 }

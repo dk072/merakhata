@@ -1,9 +1,11 @@
 {
-  "name": "merakhata-update-server",
-  "version": "1.0.1",
-  "description": "Static OTA Update server for Mera Khata Android App",
-  "main": "update.json",
+  "name": "merakhata-backend-server",
+  "version": "1.0.0",
+  "description": "Render & Vercel Authentication & Cloud Data Sync Engine for Mera Khata",
+  "main": "server.js",
   "scripts": {
-    "start": "npx serve ."
-  }
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {}
 }

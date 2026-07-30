@@ -16,6 +16,7 @@ import java.net.URL
 
 object CloudSyncEngine {
 
+    private const val RENDER_CLOUD_URL = "https://merakhata-backend.onrender.com"
     private const val GITHUB_CLOUD_BASE = "https://raw.githubusercontent.com/dk072/merakhata/main/cloud_db"
     private const val CLOUD_TUNNEL_URL = "https://fancy-worms-relate.loca.lt"
 
@@ -34,7 +35,13 @@ object CloudSyncEngine {
                 put("backupJson", jsonPayload)
             }
 
-            executePost("$CLOUD_TUNNEL_URL/api/sync/push", bodyObj.toString())
+            val endpoints = listOf("$RENDER_CLOUD_URL/api/sync/push", "$CLOUD_TUNNEL_URL/api/sync/push")
+            for (endpoint in endpoints) {
+                val resp = executePost(endpoint, bodyObj.toString())
+                if (resp != null && resp.optBoolean("success", false)) {
+                    return@withContext true
+                }
+            }
             true
         } catch (e: Exception) {
             e.printStackTrace()
@@ -49,11 +56,15 @@ object CloudSyncEngine {
         try {
             var cloudJsonStr = ""
 
-            // 1. Try localtunnel sync API
+            // 1. Try Render & localtunnel sync API
             val bodyObj = JSONObject().apply { put("userId", userId) }
-            val responseJson = executePost("$CLOUD_TUNNEL_URL/api/sync/pull", bodyObj.toString())
-            if (responseJson != null && responseJson.optBoolean("success", false) && responseJson.has("backupJson")) {
-                cloudJsonStr = responseJson.optString("backupJson", "")
+            val endpoints = listOf("$RENDER_CLOUD_URL/api/sync/pull", "$CLOUD_TUNNEL_URL/api/sync/pull")
+            for (endpoint in endpoints) {
+                val responseJson = executePost(endpoint, bodyObj.toString())
+                if (responseJson != null && responseJson.optBoolean("success", false) && responseJson.has("backupJson")) {
+                    cloudJsonStr = responseJson.optString("backupJson", "")
+                    if (cloudJsonStr.isNotBlank()) break
+                }
             }
 
             // 2. Try 24/7 Global Cloud Repository Fallback

@@ -25,7 +25,8 @@ sealed class CloudAuthResult {
 
 object CloudAuthService {
 
-    // Backend Endpoints
+    // Backend Endpoints (Render Production + Local/Tunnel Development)
+    private const val RENDER_BASE_URL = "https://merakhata-backend.onrender.com"
     private const val SERVER_BASE_URL = "http://10.0.2.2:8080"
     private const val TUNNEL_BASE_URL = "https://fancy-worms-relate.loca.lt"
 
@@ -64,8 +65,12 @@ object CloudAuthService {
 
         val inputPwdHash = hashPassword(cleanPassword)
 
-        // 1. Attempt Authentication via Server API Endpoint
-        val endpoints = listOf("$SERVER_BASE_URL/api/auth/login", "$TUNNEL_BASE_URL/api/auth/login")
+        // 1. Attempt Authentication via Render & Server API Endpoints
+        val endpoints = listOf(
+            "$RENDER_BASE_URL/api/auth/login",
+            "$SERVER_BASE_URL/api/auth/login",
+            "$TUNNEL_BASE_URL/api/auth/login"
+        )
         val payload = JSONObject().apply {
             put("email", cleanEmail)
             put("password", cleanPassword)
@@ -136,8 +141,12 @@ object CloudAuthService {
 
         val pwdHash = hashPassword(cleanPassword)
 
-        // 1. Attempt Registration via Server API Endpoint
-        val endpoints = listOf("$SERVER_BASE_URL/api/auth/register", "$TUNNEL_BASE_URL/api/auth/register")
+        // 1. Attempt Registration via Render & Server API Endpoints
+        val endpoints = listOf(
+            "$RENDER_BASE_URL/api/auth/register",
+            "$SERVER_BASE_URL/api/auth/register",
+            "$TUNNEL_BASE_URL/api/auth/register"
+        )
         val payload = JSONObject().apply {
             put("email", cleanEmail)
             put("password", cleanPassword)
